@@ -1,7 +1,7 @@
 import cv2
 import time
 import os
-from common_utils import get_folder_count
+from acquire_data.images.common_utils import get_folder_count
 
 def acquire_dart_images(cam_index, date_folder, fourcc, frame_rate, barrier, cam_folder, acquire_time):
     print(f"Starting dart camera {cam_index+1}")

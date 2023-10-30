@@ -4,7 +4,7 @@ import numpy as np
 import time
 import os
 import pickle
-from common_utils import get_folder_count
+from acquire_data.images.common_utils import get_folder_count
 from rotpy.system import SpinSystem
 from rotpy.camera import CameraList
 

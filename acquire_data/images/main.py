@@ -2,9 +2,9 @@ import datetime
 import multiprocessing
 import cv2
 import os
-from common_utils import init_structure
-from body_cam import acquire_images_common
-from dart_cam import acquire_dart_images
+from acquire_data.images.common_utils import init_structure
+from acquire_data.images.body_cam import acquire_images_common
+from acquire_data.images.dart_cam import acquire_dart_images
 
 if __name__ == "__main__":
     date_folder = os.path.join("../", datetime.datetime.now().strftime("%Y-%m-%d"))
