@@ -1,0 +1,3 @@
+rotpy
+opencv-python
+numpy
