@@ -11,6 +11,18 @@ from rotpy.camera import CameraList
 system = SpinSystem()
 cameras = CameraList.create_from_system(system, update_cams=True, update_interfaces=True)
 
+
+def collect(duration, save_path):
+    eeg_data = collect_eeg_data(duration)
+    print(len(eeg_data))
+    print(len(eeg_data[0]))
+    eeg_file_name = "eeg.csv"
+    glove_path = save_path + "/" + eeg_file_name
+    with open(glove_path, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        for row in eeg_data:
+            writer.writerow(row)
+
 def acquire_images_common(cam_index, date_folder, fourcc, frame_rate, barrier, cam_folder, acquire_time):
     print(f"Starting body camera {cam_index+1}")
     camera = cameras.create_camera_by_index(cam_index)
