@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     barrier = multiprocessing.Barrier(3)
 
-    process1 = multiprocessing.Process(target=acquire_images_common, args=(0, date_folder, None, frame_rate_1, barrier, 'body_tracking/camera_1', acquire_time))
+    process1 = multiprocessing.Process(target=acquire_images_common, args=(0, date_folder, None, frame_rate_1, barrier, 'body_tracking/camera_1', 10))
     process2 = multiprocessing.Process(target=acquire_images_common, args=(1, date_folder, None, frame_rate_1, barrier, 'body_tracking/camera_2', acquire_time))
     process3 = multiprocessing.Process(target=acquire_dart_images, args=(0, date_folder, None, 30, barrier, 'dart_tracking', acquire_time))
 

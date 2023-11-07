@@ -9,6 +9,14 @@ from acquire_data.eeg import eeg
 from acquire_data.emg import emg
 from acquire_data.images import body_cam, dart_cam, common_utils, main
 
+base_path = "../data/"
+today_str = datetime.now().strftime('%Y-%m-%d')
+folder_path = os.path.join(base_path, today_str)
+if not os.path.exists(folder_path):
+    os.makedirs(folder_path)
+
+acquire_time = 10
+
 def get_save_path():
     base_path = "../data/"
     today_str = datetime.now().strftime('%Y-%m-%d')
@@ -24,17 +32,17 @@ def get_save_path():
     return trial_path
 
 
-def start_bodycam(save_path):
-    print("collecting bodycam data")
-    main(duration=10)
+def start_bodycam(save_path, cam_index):
+    print("collecting bodycam data for camera " + str(cam_index+1))
+    body_cam.acquire_images_common(cam_index, base_path, None, 120, None, f'body_tracking/camera_{cam_index+1}', acquire_time)
 
 def start_gloves(save_path):
     print("collecting gloves data")
-    gloves.collect(10, save_path)
+    gloves.collect(acquire_time, save_path)
 
 def start_eeg(save_path):
     print("collecting eeg")
-    eeg.collect(10, save_path)
+    eeg.collect(acquire_time, save_path)
 
 def capture_board(save_path):
     print("capturing board")
@@ -42,20 +50,24 @@ def capture_board(save_path):
 def run_trial():
     save_path = get_save_path()
 
-    proc_bodycam = multiprocessing.Process(target=start_bodycam, args=(save_path,))
+    proc_bodycam_0 = multiprocessing.Process(target=start_bodycam, args=(save_path,0)) #TODO name it as right and left
+    proc_bodycam_1 = multiprocessing.Process(target=start_bodycam, args=(save_path,1))
     proc_gloves = multiprocessing.Process(target=start_gloves, args=(save_path,))
     proc_eeg = multiprocessing.Process(target=start_eeg, args=(save_path,))
     
-    proc_bodycam.start()
+    proc_bodycam_0.start()
+    proc_bodycam_1.start()
     proc_gloves.start()
     proc_eeg.start()
 
-    proc_bodycam.join()
+    proc_bodycam_0.join()
+    proc_bodycam_1.join()
     proc_gloves.join()
     proc_eeg.join()
 
 
-    proc_bodycam.terminate()
+    proc_bodycam_0.terminate()
+    proc_bodycam_1.terminate()
     proc_gloves.terminate()
     proc_eeg.terminate()
 
@@ -63,3 +75,10 @@ def run_trial():
 
 if __name__ == '__main__':
     run_trial()
+
+
+#TODO
+'''
+remove save path from all functions
+get some global values like frame rate etc
+'''
