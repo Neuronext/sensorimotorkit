@@ -9,12 +9,14 @@ from acquire_data.eeg import eeg
 from acquire_data.emg import emg
 from acquire_data.images import body_cam, dart_cam, common_utils, main
 
-base_path = "../data/"
+base_path = r'./data/'
 today_str = datetime.now().strftime('%Y-%m-%d')
-folder_path = os.path.join(base_path, today_str)
-if not os.path.exists(folder_path):
-    os.makedirs(folder_path)
+curr_trial_path = os.path.join(base_path, today_str)
+if not os.path.exists(curr_trial_path):
+    os.makedirs(curr_trial_path)
 
+common_utils.init_structure(curr_trial_path)
+print(f"folder {curr_trial_path} structure initialized")
 acquire_time = 10
 
 def get_save_path():
@@ -34,7 +36,7 @@ def get_save_path():
 
 def start_bodycam(save_path, cam_index):
     print("collecting bodycam data for camera " + str(cam_index+1))
-    body_cam.acquire_images_common(cam_index, base_path, None, 120, None, f'body_tracking/camera_{cam_index+1}', acquire_time)
+    body_cam.acquire_images_common(cam_index, curr_trial_path, None, 120, None, f'body_tracking/camera_{cam_index+1}', acquire_time)
 
 def start_gloves(save_path):
     print("collecting gloves data")
@@ -81,4 +83,5 @@ if __name__ == '__main__':
 '''
 remove save path from all functions
 get some global values like frame rate etc
+data should be pushed to gcloud or something - preprocessing should do this
 '''

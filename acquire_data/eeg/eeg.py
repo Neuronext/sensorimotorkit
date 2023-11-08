@@ -47,8 +47,9 @@ def collect(duration, save_path):
     print(len(eeg_data))
     print(len(eeg_data[0]))
     eeg_file_name = "eeg.csv"
-    glove_path = save_path + "/" + eeg_file_name
-    with open(glove_path, 'w', newline='') as csvfile:
+    eeg_path = save_path + "/" + eeg_file_name
+    print(f'eeg path saved at {eeg_path}')
+    with open(eeg_path, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         for row in eeg_data:
             writer.writerow(row)

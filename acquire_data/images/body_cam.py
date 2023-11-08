@@ -58,7 +58,7 @@ def acquire_images_common(cam_index, date_folder, fourcc, frame_rate, barrier, c
 
         fps_end = time.time()
         fps = 1 / (fps_end - fps_start)
-        print(f"Body {cam_index+1} FPS: {fps}")
+        # print(f"Body {cam_index+1} FPS: {fps}")
 
         if cv2.waitKey(1) & 0xFF == 27:
             break

@@ -53,6 +53,7 @@ def collect(seconds, save_path):
 
     glove_file_name = "gloves.csv"
     glove_path = save_path + "/" + glove_file_name
+    print(f'glove path saved at {glove_path}')
     with open(glove_path, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         for row in output:

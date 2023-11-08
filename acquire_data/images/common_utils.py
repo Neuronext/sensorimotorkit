@@ -1,7 +1,12 @@
 import os
 
 def get_folder_count(folder):
-    return len([name for name in os.listdir(folder) if os.path.isdir(os.path.join(folder, name))])
+    # return len([name for name in os.listdir(folder) if os.path.isdir(os.path.join(folder, name))]) weird windows error
+    try:
+        return len([name for name in os.listdir(folder) if os.path.isdir(os.path.join(folder, name))])
+    except FileNotFoundError:
+        print(f"Folder not found: {folder}")
+        return 0
 
 def get_file_count(folder):
     return len([name for name in os.listdir(folder) if os.path.isfile(os.path.join(folder, name))])
@@ -14,7 +19,10 @@ def init_structure(date_folder):
     }
     for cam, folders in cams_structure.items():
         for folder in folders:
-            raw_path = os.path.join(date_folder, cam, folder)
+            raw_path = os.path.normpath(os.path.join(date_folder, cam, folder))
+            full_path = os.path.abspath(raw_path)
+            print(f"full path {full_path}")
             os.makedirs(raw_path, exist_ok=True)
+
             index = get_folder_count(raw_path)
             os.makedirs(os.path.join(raw_path, str(index)), exist_ok=True)
