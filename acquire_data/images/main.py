@@ -8,6 +8,7 @@ from acquire_data.images.dart_cam import acquire_dart_images
 
 if __name__ == "__main__":
     date_folder = os.path.join("../", datetime.datetime.now().strftime("%Y-%m-%d"))
+    print('------------------- main from images is being called -------------------')
     init_structure(date_folder)
 
     fourcc = cv2.VideoWriter_fourcc(*"MJPG")
