@@ -48,4 +48,3 @@ class TrialManager:
             writer = csv.writer(csvfile)
             for row in data:
                 writer.writerow(row)
-        print(f'Data saved at {file_path}')

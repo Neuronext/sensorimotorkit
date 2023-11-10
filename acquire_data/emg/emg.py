@@ -29,5 +29,7 @@ def collect_emg_data(duration, trial_path):
     if emg_data is None:
         print("[EMG] No data collected for this trial.")
         return
+    
     emg_path = os.path.join(trial_path, Constants.EMG_FILE_NAME)
     TrialManager.save_data_to_csv(emg_data, emg_path)
+    print(f"EMG data saved at {emg_data}")

@@ -32,3 +32,4 @@ def collect_eeg_data(duration, trial_path):
 
     eeg_path = os.path.join(trial_path, Constants.EEG_FILE_NAME)
     TrialManager.save_data_to_csv(eeg_data, eeg_path)
+    print(f"EEG data saved at {eeg_path}")

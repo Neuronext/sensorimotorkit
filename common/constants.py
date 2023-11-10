@@ -40,6 +40,13 @@ class Constants:
     EMG_SERIAL_PORT = 'COM4'
     EMG_FILE_NAME = 'emg.csv'
 
+    # Gloves
+    GLOVE_IP = "127.0.0.1" #TODO is this the right IP? and are ports correct?
+    GLOVE_PORT_RIGHT = 53450
+    GLOVE_PORT_LEFT = 53451
+    GLOVE_FILE_NAME = "gloves.csv"
+    GLOVE_HAND = "right" # is this right or is this wrong or is this left? lol
+
 
 #TODO is there a better way to do this?
 

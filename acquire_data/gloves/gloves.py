@@ -1,61 +1,40 @@
-import socket
+import os
 import time
-import csv
+import socket
+from common.constants import Constants
+from common.common_utils import TrialManager
 
-def get_glove_port_number(hand):
-    if hand == "right":
-        port_number = 53450
-    else:
-        port_number = 53451
-    return port_number
-
-def get_glove_ip():
-    ip_address = "127.0.0.1"
-    return ip_address
-
-def get_socket():
+def get_glove_config():
+    ip = Constants.GLOVE_IP
+    port = Constants.GLOVE_PORT_RIGHT if Constants.GLOVE_HAND == "right" else Constants.GLOVE_PORT_LEFT
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(0.1)
-    return sock
+    return ip, port, sock
 
-def get_data(t, sock, ip, port):
-    if t != time.time():
-        message = '{"type":"ping"}'.encode()
-        sock.sendto(message, (ip, port))
-        t = time.time()
-    # Receive a message from the target IP address and port
-    try:
-        data, address = sock.recvfrom(10000)
-        decoded = data.decode()
-        return decoded, t
-    except Exception as e:
-        return "nothing", t
-
-def collect(seconds, save_path):
-
-    # Set the IP address and port number to send to
-    ip = get_glove_ip()
-    hand = "right"
-    port = get_glove_port_number(hand)
-
-    # Create a UDP socket
-    sock = get_socket()
-
-    t = 0
+def stream_glove_data(duration):
+    ip, port, sock = get_glove_config()
     output = []
-    # Set the duration for data collection (in seconds)
-    collection_duration = seconds
-    start_time = time.time()
+    end_time = time.time() + duration
 
-    while time.time() - start_time < collection_duration:
-        new_data, t = get_data(t, sock, ip, port)
-        output.append(new_data)
+    while time.time() < end_time:
+        try:
+            message = '{"type":"ping"}'.encode()
+            sock.sendto(message, (ip, port))
 
-    glove_file_name = "gloves.csv"
-    glove_path = save_path + "/" + glove_file_name
-    print(f'glove path saved at {glove_path}')
-    with open(glove_path, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        for row in output:
-            writer.writerow(row)
-    print("saved glove data")
+            data, _ = sock.recvfrom(10000)
+            output.append(data.decode())
+        except socket.timeout:
+            print("[Glove] Connection timed out")
+            pass
+
+    return output
+
+def collect_glove_data(duration, trial_path):
+    glove_data = stream_glove_data(duration)
+    if not glove_data:
+        print("[Glove] No data collected for this trial")
+        return
+
+    glove_path = os.path.join(trial_path, Constants.GLOVE_FILE_NAME)
+    TrialManager.save_data_to_csv(glove_data, glove_path)
+    print(f"Glove data saved at {glove_path}")
