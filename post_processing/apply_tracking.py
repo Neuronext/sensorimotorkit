@@ -33,9 +33,10 @@ def apply_histograms(trial_path, raw_path, processed_path):
         print(f"Failed to read the first image from {first_image_path}. Exiting function.")
         return
     height, width = first_image.shape[:2]
-
+    
+    output_dir = os.path.dirname(processed_dir) 
     out = cv2.VideoWriter(
-        os.path.normpath(os.path.join(processed_dir, 'processed_image_with_hist.mp4')), 
+        os.path.normpath(os.path.join(output_dir, 'processed_image_with_hist.mp4')), 
         cv2.VideoWriter_fourcc(*'mp4v'), 
         30, 
         (width * 2, height)

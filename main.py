@@ -40,6 +40,7 @@ def capture_board(trial_path):
 def run_trial(trial_path):
 
     #TODO can add a taskflow?
+    #TODO add a sound cue to indicate start of trial
     proc_bodycam_left = multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)) #TODO name it as right and left
     proc_bodycam_right = multiprocessing.Process(target=start_bodycam_right, args=(trial_path,))
     # proc_gloves = multiprocessing.Process(target=start_gloves, args=(trial_path,))
@@ -61,7 +62,7 @@ def run_trial(trial_path):
 def run_post_processing(trial_path):
     print("Running post processing")
     process_body_cam_images(trial_path)
-    
+
     #TODO run post processing
 
 if __name__ == '__main__':
@@ -72,7 +73,7 @@ if __name__ == '__main__':
     run_trial(trial_path) #TODO avoid passing trial_path everywhere, currently passed because folders get created multiple times
     print("Data collection complete, starting post processing...")
     # run post processing
-    run_post_processing(trial_path)
+    # run_post_processing(trial_path) #TODO save these trail paths to a file so we can choose to run post processing all at once after all trials are done, it takes about 5 mins to run
     print("Post processing complete.")
 
 
