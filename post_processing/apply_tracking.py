@@ -14,7 +14,7 @@ def sort_key_func(file_name):
     numbers = re.findall(r'\d+', file_name)
     return int(numbers[0]) if numbers else 0
 
-def apply_histograms(trial_path, raw_path, processed_path):
+def apply_histograms(trial_path, raw_path, processed_path, output_name, frame_rate=30):
 
     raw_dir = os.path.normpath(os.path.join(trial_path, raw_path))
     processed_dir = os.path.normpath(os.path.join(trial_path, processed_path))
@@ -36,9 +36,9 @@ def apply_histograms(trial_path, raw_path, processed_path):
     
     output_dir = os.path.dirname(processed_dir) 
     out = cv2.VideoWriter(
-        os.path.normpath(os.path.join(output_dir, 'processed_image_with_hist.mp4')), 
+        os.path.normpath(os.path.join(output_dir, output_name)), 
         cv2.VideoWriter_fourcc(*'mp4v'), 
-        30, 
+        frame_rate, 
         (width * 2, height)
     )
 
@@ -63,6 +63,40 @@ def apply_histograms(trial_path, raw_path, processed_path):
         out.write(concat_frame)
     
     out.release()
+
+def create_video_from_images(trial_path, image_path, output_name, frame_rate=30):
+    img_dir = os.path.normpath(os.path.join(trial_path, image_path))
+    image_files = sorted(os.listdir(img_dir))
+
+    if not image_files:
+        print(f"No images found in {img_dir}. Exiting function.")
+        return
+
+    first_image_path = os.path.join(img_dir, image_files[0])
+    first_image = cv2.imread(first_image_path)
+    if first_image is None:
+        print(f"Failed to read the first image from {first_image_path}. Exiting function.")
+        return
+    height, width = first_image.shape[:2]
+
+    output_dir = os.path.dirname(img_dir) 
+    out = cv2.VideoWriter(
+        os.path.normpath(os.path.join(output_dir, output_name)), 
+        cv2.VideoWriter_fourcc(*'mp4v'), 
+        frame_rate, 
+        (width, height)
+    )
+
+    for image_file in image_files:
+        img_path = os.path.join(img_dir, image_file)
+        img = cv2.imread(img_path)
+
+        if img is not None:
+            out.write(img)
+
+    out.release()
+    print(f"Video saved at {os.path.join(output_dir, output_name)}")
+
 
 def apply_pose_tracking_on_image(image_path, tracked_image_path=None):
     with mp_pose.Pose(static_image_mode=True) as pose:
@@ -94,7 +128,13 @@ def process_body_cam_images(trial_path):
     process_images(trial_path, Paths.BODY_LEFT_RAW_PATH, Paths.BODY_LEFT_PROCESSED_PATH)
     process_images(trial_path, Paths.BODY_RIGHT_RAW_PATH, Paths.BODY_RIGHT_PROCESSED_PATH)
     
-    print("Applying histograms on body cam images")
-    apply_histograms(trial_path, Paths.BODY_LEFT_PROCESSED_PATH, Paths.BODY_LEFT_PROCESSED_PATH)
-    apply_histograms(trial_path, Paths.BODY_RIGHT_PROCESSED_PATH, Paths.BODY_RIGHT_PROCESSED_PATH)
+    # print("Applying histograms on body cam images")
+    # apply_histograms(trial_path, Paths.BODY_LEFT_PROCESSED_PATH, Paths.BODY_LEFT_PROCESSED_PATH,
+    #                  "body_left_processed_with_hist.mp4")
+    # apply_histograms(trial_path, Paths.BODY_RIGHT_PROCESSED_PATH, Paths.BODY_RIGHT_PROCESSED_PATH, 
+    #                  "body_right_processed_with_hist.mp4")
+
+    print("Creating video from body cam images")
+    create_video_from_images(trial_path, Paths.BODY_LEFT_PROCESSED_PATH, "body_left_processed.mp4")
+    create_video_from_images(trial_path, Paths.BODY_RIGHT_PROCESSED_PATH, "body_right_processed.mp4")
 

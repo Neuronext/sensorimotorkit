@@ -1,6 +1,8 @@
 # import common packages
 import multiprocessing
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 
 # import custom modules
 from acquire_data.gloves import gloves
@@ -11,7 +13,6 @@ from common import common_utils
 from common.constants import Paths
 from common.constants import Constants 
 from post_processing.apply_tracking import process_body_cam_images
-
 
 def start_bodycam_left(trial_path): #TODO better state management for left and right
     print(f"Collecting bodycam left - cam_index 0 data")
@@ -28,11 +29,11 @@ def start_dartcam(trial_path):
 
 def start_gloves(trial_path):
     print("Collecting gloves data")
-    gloves.collect(Constants.ACQUIRE_TIME, trial_path)
+    gloves.collect_glove_data(Constants.ACQUIRE_TIME, trial_path)
 
 def start_eeg(trial_path):
     print("Collecting eeg data")
-    eeg.collect(Constants.ACQUIRE_TIME, trial_path)
+    eeg.collect_eeg_data(Constants.ACQUIRE_TIME, trial_path)
 
 def capture_board(trial_path):
     print("capturing board") #TODO take a picture of the dart board
@@ -40,21 +41,20 @@ def capture_board(trial_path):
 def run_trial(trial_path):
 
     #TODO can add a taskflow?
-    #TODO add a sound cue to indicate start of trial
     proc_bodycam_left = multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)) #TODO name it as right and left
     proc_bodycam_right = multiprocessing.Process(target=start_bodycam_right, args=(trial_path,))
-    # proc_gloves = multiprocessing.Process(target=start_gloves, args=(trial_path,))
-    # proc_eeg = multiprocessing.Process(target=start_eeg, args=(trial_path,))
+    proc_gloves = multiprocessing.Process(target=start_gloves, args=(trial_path,))
+    proc_eeg = multiprocessing.Process(target=start_eeg, args=(trial_path,))
     
     proc_bodycam_right.start()
     proc_bodycam_left.start()
-    # proc_gloves.start()
-    # proc_eeg.start()
+    proc_gloves.start()
+    proc_eeg.start()
 
     proc_bodycam_right.join()
     proc_bodycam_left.join()
-    # proc_gloves.join()
-    # proc_eeg.join()
+    proc_gloves.join()
+    proc_eeg.join()
 
     #TODO capture_board()
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     run_trial(trial_path) #TODO avoid passing trial_path everywhere, currently passed because folders get created multiple times
     print("Data collection complete, starting post processing...")
     # run post processing
-    # run_post_processing(trial_path) #TODO save these trail paths to a file so we can choose to run post processing all at once after all trials are done, it takes about 5 mins to run
+    run_post_processing(trial_path) #TODO save these trail paths to a file so we can choose to run post processing all at once after all trials are done, it takes about 5 mins to run
     print("Post processing complete.")
 
 

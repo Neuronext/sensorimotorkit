@@ -4,10 +4,12 @@ import brainflow
 import csv
 from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from brainflow.exit_codes import BrainFlowExitCodes
-
+import logging
 from common.constants import Paths, Constants
 from common.common_utils import TrialManager
 from common.board_utils import initialize_board
+
+BoardShim.set_log_level(logging.ERROR) 
 
 def stream_eeg_data(duration):
     board = initialize_board(Constants.EEG_SERIAL_PORT, Constants.EEG_BOARD_ID)
