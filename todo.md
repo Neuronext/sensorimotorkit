@@ -1,4 +1,7 @@
 ### current tasks - high priority
+- add better logging
+- push all the images to gcloud/aws
+- get all the TODOs from the code and add them here
 - making sure the intervals are spaced at the same time - 250 fps - 4ms
 - np reshape should be done later - or check get_image_data what does it give
 - dart camera is acquired at the same time 

@@ -23,7 +23,7 @@ class TrialManager:
         if not os.path.exists(trial_base_path):
             os.makedirs(trial_base_path)
         trial_number = len(os.listdir(trial_base_path))
-        return os.path.join(trial_base_path, str(trial_number)), trial_number
+        return os.path.join(trial_base_path, str(trial_number))
     
     @staticmethod
     def init_structure(trial_path):
@@ -36,6 +36,6 @@ class TrialManager:
     @staticmethod
     def setup_trial():
         trial_base_path = TrialManager.get_trial_base_path()
-        trial_path, trial_number = TrialManager.create_trial_path(trial_base_path)
+        trial_path = TrialManager.create_trial_path(trial_base_path)
         TrialManager.init_structure(trial_path)
-        return trial_path, trial_number
+        return trial_path

@@ -3,10 +3,8 @@ import cv2
 import numpy as np
 import time
 import os
-import pickle
 from rotpy.system import SpinSystem
 from rotpy.camera import CameraList
-from common.constants import Paths
 
 system = SpinSystem()
 cameras = CameraList.create_from_system(system, update_cams=True, update_interfaces=True)
@@ -43,6 +41,10 @@ def acquire_images_common(cam_index, trial_path, fourcc, frame_rate, barrier, ca
     print(f"Saving images of camera {cam_index} to {cam_folder_for_trial}")
     for idx, (timestamp, raw_data) in enumerate(image_dump): #TODO find a scalable way to save images
         frame = np.array(raw_data).reshape(resolution)
+        if cam_index == 0:
+            frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+        else:
+            frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
         #TODO add rotation based on camera - should not be hardcoded - ideally should be in the constants file
         cv2.imwrite(f"{cam_folder_for_trial}/frame_{idx}_{timestamp:.6f}.png", frame)
 

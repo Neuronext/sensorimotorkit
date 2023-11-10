@@ -22,9 +22,12 @@ class Paths:
 
 
 # Other constants
-ACQUIRE_TIME = 10
-FRAME_RATE_BODY_CAM = 120  
-FRAME_RATE_DART_CAM = 30
+class Constants:
+    ACQUIRE_TIME = 10
+    FRAME_RATE_BODY_CAM = 120  
+    FRAME_RATE_DART_CAM = 30
+    RESOLUTION_BODY_CAM = (600, 960)
+    RESOLUTION_DART_CAM = (480, 640) 
 
 
 #TODO is there a better way to do this?

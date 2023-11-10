@@ -12,7 +12,8 @@ def acquire_dart_images(cam_index, trial_path, fourcc, frame_rate, barrier, cam_
         return
 
     resolution = frame.shape[:2]
-    cam_folder_for_trial = os.path.normpath(os.path.join(trial_path, Paths.DARTBOARD_RAW_PATH))
+    cam_folder_for_trial = os.path.normpath(os.path.join(trial_path, cam_folder))
+
 
     print(f"Dart camera {cam_index}, resolution: {resolution}, frame rate: {frame_rate}, cam_folder: {cam_folder_for_trial}")
 
@@ -27,7 +28,7 @@ def acquire_dart_images(cam_index, trial_path, fourcc, frame_rate, barrier, cam_
         
         timestamp = time.time()
         image_dump.append((timestamp, frame))
-        
+
         if cv2.waitKey(1) & 0xFF == 27:
             break
     
