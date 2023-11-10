@@ -81,4 +81,5 @@ if __name__ == '__main__':
 #TODO
 '''
 data should be pushed to gcloud/s3 - preprocessing should handle this
+all print statements should have a [MAIN] prefix associated with it
 '''

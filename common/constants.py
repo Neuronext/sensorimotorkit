@@ -23,11 +23,22 @@ class Paths:
 
 # Other constants
 class Constants:
+    # Camera
     ACQUIRE_TIME = 10
     FRAME_RATE_BODY_CAM = 120  
     FRAME_RATE_DART_CAM = 30
     RESOLUTION_BODY_CAM = (600, 960)
-    RESOLUTION_DART_CAM = (480, 640) 
+    RESOLUTION_DART_CAM = (480, 640)
+    
+    # EEG
+    EEG_BOARD_ID = 2 
+    EEG_SERIAL_PORT = 'COM3'
+    EEG_FILE_NAME = 'eeg.csv'
+    
+    # EMG
+    EMG_BOARD_ID = 1
+    EMG_SERIAL_PORT = 'COM4'
+    EMG_FILE_NAME = 'emg.csv'
 
 
 #TODO is there a better way to do this?

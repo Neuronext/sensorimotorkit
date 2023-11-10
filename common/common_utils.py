@@ -2,6 +2,7 @@
 import os
 from datetime import datetime
 from common.constants import Paths
+import csv
 
 class TrialManager:
     @staticmethod
@@ -39,3 +40,12 @@ class TrialManager:
         trial_path = TrialManager.create_trial_path(trial_base_path)
         TrialManager.init_structure(trial_path)
         return trial_path
+    
+    @staticmethod
+    def save_data_to_csv(data, file_path):
+        print(f'Saving data to {file_path}')
+        with open(file_path, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for row in data:
+                writer.writerow(row)
+        print(f'Data saved at {file_path}')
