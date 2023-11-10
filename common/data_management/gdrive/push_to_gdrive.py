@@ -1,3 +1,4 @@
+# DEPRECATED: This script is not functional. It is kept here for reference only.
 import os
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload

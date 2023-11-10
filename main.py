@@ -60,7 +60,8 @@ def run_trial(trial_path):
 
 def run_post_processing(trial_path):
     print("Running post processing")
-    process_body_cam_images(trial_path, rotation=None) 
+    process_body_cam_images(trial_path)
+    
     #TODO run post processing
 
 if __name__ == '__main__':

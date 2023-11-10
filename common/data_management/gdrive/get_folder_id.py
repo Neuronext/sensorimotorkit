@@ -1,3 +1,4 @@
+# DEPRECATED: This script is not functional. It is kept here for reference only.
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 
