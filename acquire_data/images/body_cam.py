@@ -17,26 +17,34 @@ def acquire_images_common(cam_index, trial_path, fourcc, frame_rate, barrier, ca
     camera = cameras.create_camera_by_index(cam_index)
     camera.init_cam()
 
-    resolution = (camera.camera_nodes.Height.get_node_value(), camera.camera_nodes.Width.get_node_value()) # probably can be hardcoded
-    print(f"Resolution of camera {cam_index}: {resolution}")
-    #         raw_path = os.path.normpath(os.path.join(trial_path, path))
-    # cam_path = Paths.BODY_LEFT_RAW_PATH if cam_index == 0 else Paths.BODY_RIGHT_RAW_PATH
-    cam_folder_for_trial = os.path.normpath(os.path.join(trial_path, cam_folder))
+    resolution = (camera.camera_nodes.Height.get_node_value(), camera.camera_nodes.Width.get_node_value()) #TODO probably can be hardcoded, or should be in constants file
 
-    print(f"Saving images of camera {cam_index} to {cam_folder_for_trial}")
+    cam_folder_for_trial = os.path.normpath(os.path.join(trial_path, cam_folder))
+    print(f"Camera {cam_index}, resolution: {resolution}, frame rate: {frame_rate}, cam_folder: {cam_folder_for_trial}")
+
     camera.begin_acquisition()
     start_time = time.time()
 
+    image_dump = []
+
     while time.time() - start_time < acquire_time:
 
-        image_count = int((time.time() - start_time) * frame_rate)
         image = camera.get_next_image()
         raw_data = image.get_image_data()
-        with open(f"{cam_folder_for_trial}/frame_{image_count}_{cam_index+1}.pkl", "wb") as f:
-            pickle.dump(raw_data, f)
+        
+        timestamp = time.time()
+        image_dump.append((timestamp, raw_data))
+
         image.release()
+        
         if cv2.waitKey(1) & 0xFF == 27:
             break
+    
+    print(f"Saving images of camera {cam_index} to {cam_folder_for_trial}")
+    for idx, (timestamp, raw_data) in enumerate(image_dump): #TODO find a scalable way to save images
+        frame = np.array(raw_data).reshape(resolution)
+        #TODO add rotation based on camera - should not be hardcoded - ideally should be in the constants file
+        cv2.imwrite(f"{cam_folder_for_trial}/frame_{idx}_{timestamp:.6f}.png", frame)
 
     camera.end_acquisition()
     camera.deinit_cam()

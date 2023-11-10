@@ -61,7 +61,7 @@ def run_trial(trial_path):
 if __name__ == '__main__':
     
     trial_path, trial_number = common_utils.TrialManager.setup_trial()
-    print(f'Initialized the Trial Path: {trial_path}')
+    print(f'Initialized the Trial Path: {os.path.normpath(trial_path)}')
 
     run_trial(trial_path) #TODO avoid passing trial_path everywhere, currently passed because folders get created multiple times
 
