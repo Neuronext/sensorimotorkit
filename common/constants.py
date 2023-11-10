@@ -23,7 +23,8 @@ class Paths:
 
 # Other constants
 ACQUIRE_TIME = 10
-FRAME_RATE = 120  
+FRAME_RATE_BODY_CAM = 120  
+FRAME_RATE_DART_CAM = 30
 
 
 #TODO is there a better way to do this?

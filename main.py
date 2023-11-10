@@ -10,16 +10,21 @@ from acquire_data.emg import emg
 from acquire_data.images import body_cam, dart_cam
 from common import common_utils
 from common.constants import Paths
-from common.constants import ACQUIRE_TIME, FRAME_RATE
+from common.constants import ACQUIRE_TIME, FRAME_RATE_BODY_CAM, FRAME_RATE_DART_CAM
 
 
 def start_bodycam_left(trial_path): #TODO better state management for left and right
     print(f"Collecting bodycam left - cam_index 0 data")
-    body_cam.acquire_images_common(0, trial_path, None, FRAME_RATE, None, Paths, ACQUIRE_TIME)
+    body_cam.acquire_images_common(0, trial_path, None, FRAME_RATE_BODY_CAM, None, Paths.BODY_LEFT_RAW_PATH, ACQUIRE_TIME)
 
 def start_bodycam_right(trial_path):
     print(f"Collecting bodycam right - cam_index 1 data")
-    body_cam.acquire_images_common(1, trial_path, None, FRAME_RATE, None, f'body_tracking/camera_left', ACQUIRE_TIME)
+    body_cam.acquire_images_common(1, trial_path, None, FRAME_RATE_BODY_CAM, None, Paths.BODY_RIGHT_RAW_PATH, ACQUIRE_TIME)
+
+#TODO untested
+def start_dartcam(trial_path):
+    print(f"Collecting bodycam right - cam_index 1 data")
+    body_cam.acquire_images_common(0, trial_path, None, FRAME_RATE_DART_CAM, None, f'body_tracking/camera_left', ACQUIRE_TIME)
 
 def start_gloves(trial_path):
     print("Collecting gloves data")
@@ -63,7 +68,5 @@ if __name__ == '__main__':
 
 #TODO
 '''
-remove save path from all functions
-get some global values like frame rate etc
-data should be pushed to gcloud or something - preprocessing should do this
+data should be pushed to gcloud/s3 - preprocessing should handle this
 '''

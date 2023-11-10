@@ -11,15 +11,11 @@ def acquire_dart_images(cam_index, trial_path, fourcc, frame_rate, barrier, cam_
         print("Failed to open Dart camera.")
         return
 
-    frame_rate = 30  # Dart camera
     resolution = frame.shape[:2]
-
     cam_folder_for_trial = trial_path + Paths.DARTBOARD_RAW_PATH
 
     start_time = time.time()
     while time.time() - start_time < acquire_time:
-        # barrier.wait()
-        fps_start = time.time()
         ret, frame = cap.read()
         if not ret:
             print("Failed to acquire image from Dart camera.")

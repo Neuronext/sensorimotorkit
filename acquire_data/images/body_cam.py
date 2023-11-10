@@ -20,8 +20,8 @@ def acquire_images_common(cam_index, trial_path, fourcc, frame_rate, barrier, ca
     resolution = (camera.camera_nodes.Height.get_node_value(), camera.camera_nodes.Width.get_node_value()) # probably can be hardcoded
     print(f"Resolution of camera {cam_index}: {resolution}")
     #         raw_path = os.path.normpath(os.path.join(trial_path, path))
-    cam_path = Paths.BODY_LEFT_RAW_PATH if cam_index == 0 else Paths.BODY_RIGHT_RAW_PATH
-    cam_folder_for_trial = os.path.normpath(os.path.join(trial_path, cam_path))
+    # cam_path = Paths.BODY_LEFT_RAW_PATH if cam_index == 0 else Paths.BODY_RIGHT_RAW_PATH
+    cam_folder_for_trial = os.path.normpath(os.path.join(trial_path, cam_folder))
 
     print(f"Saving images of camera {cam_index} to {cam_folder_for_trial}")
     camera.begin_acquisition()
