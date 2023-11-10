@@ -24,7 +24,7 @@ class Paths:
 # Other constants
 class Constants:
     # Camera
-    ACQUIRE_TIME = 10
+    ACQUIRE_TIME = 3
     FRAME_RATE_BODY_CAM = 120  
     FRAME_RATE_DART_CAM = 30
     RESOLUTION_BODY_CAM = (600, 960)
@@ -33,18 +33,19 @@ class Constants:
     # EEG
     EEG_BOARD_ID = 2 
     EEG_SERIAL_PORT = 'COM3'
-    EEG_FILE_NAME = 'eeg.csv'
+    EEG_FILE_NAME = Paths.EEG_PATH + '/eeg.csv'
     
     # EMG
     EMG_BOARD_ID = 1
     EMG_SERIAL_PORT = 'COM4'
     EMG_FILE_NAME = 'emg.csv'
+    EMG_FILE_NAME = Paths.EMG_PATH + '/emg.csv'
 
     # Gloves
     GLOVE_IP = "127.0.0.1" #TODO is this the right IP? and are ports correct?
     GLOVE_PORT_RIGHT = 53450
     GLOVE_PORT_LEFT = 53451
-    GLOVE_FILE_NAME = "gloves.csv"
+    GLOVE_FILE_NAME = Paths.GLOVES_PATH + '/gloves.csv'
     GLOVE_HAND = "right" # is this right or is this wrong or is this left? lol
 
 

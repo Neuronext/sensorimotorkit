@@ -24,7 +24,7 @@ def start_bodycam_right(trial_path):
 
 #TODO untested
 def start_dartcam(trial_path):
-    print(f"Collecting bodycam right - cam_index 1 data")
+    print(f"Collecting dartcam")
     dart_cam.acquire_dart_images(0, trial_path, None, Constants.FRAME_RATE_DART_CAM, None, Paths.DARTBOARD_RAW_PATH, Constants.ACQUIRE_TIME)
 
 def start_gloves(trial_path):
@@ -43,16 +43,19 @@ def run_trial(trial_path):
     #TODO can add a taskflow?
     proc_bodycam_left = multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)) #TODO name it as right and left
     proc_bodycam_right = multiprocessing.Process(target=start_bodycam_right, args=(trial_path,))
+    proc_dartcam = multiprocessing.Process(target=start_dartcam, args=(trial_path,))
     proc_gloves = multiprocessing.Process(target=start_gloves, args=(trial_path,))
     proc_eeg = multiprocessing.Process(target=start_eeg, args=(trial_path,))
     
     proc_bodycam_right.start()
     proc_bodycam_left.start()
+    proc_dartcam.start()
     proc_gloves.start()
     proc_eeg.start()
 
     proc_bodycam_right.join()
     proc_bodycam_left.join()
+    proc_dartcam.join()
     proc_gloves.join()
     proc_eeg.join()
 
@@ -81,5 +84,7 @@ if __name__ == '__main__':
 #TODO
 '''
 data should be pushed to gcloud/s3 - preprocessing should handle this
-all print statements should have a [MAIN] prefix associated with it
+all print statements should have a [MAIN] prefix associated with it, similarly for other modules
+ideally the above should be a logger
+remove all the print statements from this file - clunky 
 '''

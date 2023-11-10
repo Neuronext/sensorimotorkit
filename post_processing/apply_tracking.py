@@ -66,7 +66,7 @@ def apply_histograms(trial_path, raw_path, processed_path, output_name, frame_ra
 
 def create_video_from_images(trial_path, image_path, output_name, frame_rate=30):
     img_dir = os.path.normpath(os.path.join(trial_path, image_path))
-    image_files = sorted(os.listdir(img_dir))
+    image_files = sorted(os.listdir(img_dir), key=sort_key_func)
 
     if not image_files:
         print(f"No images found in {img_dir}. Exiting function.")
@@ -137,4 +137,4 @@ def process_body_cam_images(trial_path):
     print("Creating video from body cam images")
     create_video_from_images(trial_path, Paths.BODY_LEFT_PROCESSED_PATH, "body_left_processed.mp4")
     create_video_from_images(trial_path, Paths.BODY_RIGHT_PROCESSED_PATH, "body_right_processed.mp4")
-
+    create_video_from_images(trial_path, Paths.DARTBOARD_RAW_PATH, "dartboard_processed.mp4")

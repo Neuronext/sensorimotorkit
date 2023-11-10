@@ -38,7 +38,7 @@ def acquire_images_common(cam_index, trial_path, fourcc, frame_rate, barrier, ca
         if cv2.waitKey(1) & 0xFF == 27:
             break
     
-    print(f"Saving images of camera {cam_index} to {cam_folder_for_trial}")
+    print(f"Saving images of body camera {cam_index} to {cam_folder_for_trial}")
     for idx, (timestamp, raw_data) in enumerate(image_dump): #TODO find a scalable way to save images
         frame = np.array(raw_data).reshape(resolution)
         if cam_index == 0:
