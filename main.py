@@ -73,7 +73,7 @@ if __name__ == '__main__':
     run_trial(trial_path) #TODO avoid passing trial_path everywhere, currently passed because folders get created multiple times
     print("Data collection complete, starting post processing...")
     # run post processing
-    run_post_processing(trial_path) #TODO save these trail paths to a file so we can choose to run post processing all at once after all trials are done, it takes about 5 mins to run
+    # run_post_processing(trial_path) #TODO save these trail paths to a file so we can choose to run post processing all at once after all trials are done, it takes about 5 mins to run
     print("Post processing complete.")
 
 
