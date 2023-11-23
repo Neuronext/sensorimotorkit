@@ -87,4 +87,7 @@ data should be pushed to gcloud/s3 - preprocessing should handle this
 all print statements should have a [MAIN] prefix associated with it, similarly for other modules
 ideally the above should be a logger
 remove all the print statements from this file - clunky 
+
+gloves can be expanded to include the other hand
+run post processing - should runo on a folder - loop through all the sub folders and run post processing on each of them
 '''

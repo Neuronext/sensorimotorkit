@@ -24,11 +24,11 @@ class Paths:
 # Other constants
 class Constants:
     # Camera
-    ACQUIRE_TIME = 3
-    FRAME_RATE_BODY_CAM = 120  
-    FRAME_RATE_DART_CAM = 30
-    RESOLUTION_BODY_CAM = (600, 960)
-    RESOLUTION_DART_CAM = (480, 640)
+    ACQUIRE_TIME = 3 # in seconds
+    FRAME_RATE_BODY_CAM = 120 # Hz
+    FRAME_RATE_DART_CAM = 30 # Hz
+    RESOLUTION_BODY_CAM = (600, 960) # (height, width) in pixels
+    RESOLUTION_DART_CAM = (480, 640) # (width, height) in pixels #TODO
     
     # EEG
     EEG_BOARD_ID = 2 

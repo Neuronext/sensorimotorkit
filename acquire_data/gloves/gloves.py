@@ -6,7 +6,7 @@ from common.common_utils import TrialManager
 
 def get_glove_config():
     ip = Constants.GLOVE_IP
-    port = Constants.GLOVE_PORT_RIGHT if Constants.GLOVE_HAND == "right" else Constants.GLOVE_PORT_LEFT
+    port = Constants.GLOVE_PORT_RIGHT if Constants.GLOVE_HAND == "right" else Constants.GLOVE_PORT_LEFT #TODO ask jack
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(0.1)
     return ip, port, sock
