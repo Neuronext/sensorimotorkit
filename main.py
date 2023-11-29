@@ -12,7 +12,7 @@ from acquire_data.images import body_cam, dart_cam
 from common import common_utils
 from common.constants import Paths
 from common.constants import Constants 
-from post_processing.apply_tracking import process_body_cam_images
+from feature_extraction.apply_tracking import process_body_cam_images
 
 def start_bodycam_left(trial_path): #TODO better state management for left and right
     print(f"Collecting bodycam left - cam_index 0 data")
@@ -62,11 +62,11 @@ def run_trial(trial_path):
     #TODO capture_board()
 
 
-def run_post_processing(trial_path):
-    print("Running post processing")
+def run_feature_extraction(trial_path):
+    print("Running feature extraction")
     process_body_cam_images(trial_path)
 
-    #TODO run post processing
+    #TODO run feature extraction
 
 if __name__ == '__main__':
     
@@ -74,10 +74,10 @@ if __name__ == '__main__':
     print(f'Initialized the Trial Path: {os.path.normpath(trial_path)}')
 
     run_trial(trial_path) #TODO avoid passing trial_path everywhere, currently passed because folders get created multiple times
-    print("Data collection complete, starting post processing...")
-    # run post processing
-    # run_post_processing(trial_path) #TODO save these trail paths to a file so we can choose to run post processing all at once after all trials are done, it takes about 5 mins to run
-    print("Post processing complete.")
+    print("Data collection complete, starting feature extraction...")
+    # run feature extraction
+    # run_feature_extraction(trial_path) #TODO save these trail paths to a file so we can choose to run feature extraction all at once after all trials are done, it takes about 5 mins to run
+    print("feature extraction complete.")
 
 
 
@@ -89,5 +89,5 @@ ideally the above should be a logger
 remove all the print statements from this file - clunky 
 
 gloves can be expanded to include the other hand
-run post processing - should runo on a folder - loop through all the sub folders and run post processing on each of them
+run feature extraction - should runo on a folder - loop through all the sub folders and run feature extraction on each of them
 '''

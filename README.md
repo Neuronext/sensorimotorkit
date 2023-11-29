@@ -32,7 +32,7 @@
 - The main script invokes the data acquisition module `sensorimotorkit/data_acquisition`
 - The data acquisition module invokes the common module `sensorimotorkit/common` for utility functions and constants
 - The data acquisition module writes the data to the disk and returns success/failure flags to the main script
-- The main script invokes the post processing module `sensorimotorkit/post_processing` to convert the images to tracked images
+- The main script invokes the feature extraction module `sensorimotorkit/feature_extraction` to convert the images to tracked images
 
 ## Tracking
 - We use [Google Mediapipe](https://developers.google.com/mediapipe) for tracking
