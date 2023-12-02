@@ -1,30 +1,18 @@
-### current tasks - high priority
-- add better logging
-- push all the images to gcloud/aws
-- get all the TODOs from the code and add them here
-- making sure the intervals are spaced at the same time - 250 fps - 4ms
-- np reshape should be done later - or check get_image_data what does it give
-- dart camera is acquired at the same time 
-- timestamp should be added to the image name instead of indexes
-- videos are not getting saved properly
+### retest
+- retest the frame rates by changing binning and resolution
+- testing if dart camera is working with the body cameras
 - the frame rate should be 125, we can use binning/subsampling to cut out the extra pixels
-- append images instead 
-- SpinView images are currently in Gray, convert to RGB
-- The frame rate is currently 150+ fps, need to reduce it to a resonable value
-- remove credentials.json from the repo
-- bypass onboard storage and write directly to disk
-- resolution of one body camera is (1200, 960) and the other is (600, 960)
 
+### short scripts
+- script for feature extraction for modalitites like eeg, emg etc
+- script to run feature extraction module for a given day
+- software should have compatibility with gloves for both right and left hands
+- output should be formatted in standardized format example compatible with eeglab
+- push all the images to gcloud/aws on a daily basis, create cron job
 
-### current tasks - low priority
-- Add code to do actual body tracking
-- Add documentation for the code
-- Add timestamps for the images in order to sync different data streams
-- fix the conda env and add requirements.txt as a part of the github repo 
-
-### from before
-adding more cameras
-set up onedrive/aws in order to push all the vids/csvs to cloud
-create a cron job to push all the data to google cloud
-more people tracking - check the algo 
-start with the inital set up for motor primers
+### enhancement
+- can probably use Python Taskflow in order to parallelize data acquisition for multiple modalities
+- expand the tracking to include more than one person
+- add better logging
+    - all print statements should have a [MAIN/MODALITY] prefix associated with it
+    - refactor all the print statements to use the logging module

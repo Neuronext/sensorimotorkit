@@ -28,7 +28,7 @@ class Constants:
     FRAME_RATE_BODY_CAM = 120 # Hz
     FRAME_RATE_DART_CAM = 30 # Hz
     RESOLUTION_BODY_CAM = (600, 960) # (height, width) in pixels
-    RESOLUTION_DART_CAM = (480, 640) # (width, height) in pixels #TODO
+    RESOLUTION_DART_CAM = (480, 640) # (width, height) in pixels #TODO is this right?
     
     # EEG
     EEG_BOARD_ID = 2 
@@ -47,7 +47,4 @@ class Constants:
     GLOVE_PORT_LEFT = 53451
     GLOVE_FILE_NAME = Paths.GLOVES_PATH + '/gloves.csv'
     GLOVE_HAND = "right" # is this right or is this wrong or is this left? lol
-
-
-#TODO is there a better way to do this?
 

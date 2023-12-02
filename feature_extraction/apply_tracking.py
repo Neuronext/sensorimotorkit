@@ -19,7 +19,6 @@ def apply_histograms(trial_path, raw_path, processed_path, output_name, frame_ra
     raw_dir = os.path.normpath(os.path.join(trial_path, raw_path))
     processed_dir = os.path.normpath(os.path.join(trial_path, processed_path))
 
-    #TODO find a better way?
     raw_files = sorted(os.listdir(raw_dir), key=sort_key_func)
     processed_files = sorted(os.listdir(processed_dir), key=sort_key_func)
 
