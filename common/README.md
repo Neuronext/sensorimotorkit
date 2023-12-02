@@ -2,5 +2,6 @@
 - This module performs has two types of scripts
     - utility scripts
     - constants
-- The utility scripts include board  utilites and trial management utilities
-- The constants remain unchanged during the execution of the program
+- `common_utils.py` used for trial management by the `acquire_data` module
+- `board_utils.py` has functions for initialising and error management for `eeg` and `emg` boards
+- `constants.py` includes constants for path managment, acquistion time/rate management, port management, etc.
