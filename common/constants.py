@@ -23,8 +23,9 @@ class Paths:
 
 # Other constants
 class Constants:
+
     # Camera
-    ACQUIRE_TIME = 3 # in seconds
+    ACQUIRE_TIME = 1 # in seconds
     FRAME_RATE_BODY_CAM = 120 # Hz
     FRAME_RATE_DART_CAM = 30 # Hz
     RESOLUTION_BODY_CAM = (600, 960) # (height, width) in pixels
@@ -48,3 +49,8 @@ class Constants:
     GLOVE_FILE_NAME = Paths.GLOVES_PATH + '/gloves.csv'
     GLOVE_HAND = "right" # is this right or is this wrong or is this left? lol
 
+
+class MetadataConstants:
+
+    TRIALS_PER_BATCH = 5
+    BATCHES_PER_EXPERIMENT = 10
