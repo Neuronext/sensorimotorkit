@@ -57,11 +57,11 @@ class MainGUI(QMainWindow):
         # add traffic lights to layout
         for key, light in self.trafficLights.items():
             layout.addWidget(light)
-            print(f"Added traffic light for {key}")
 
         # Set main widget
         centralWidget = QWidget()
         centralWidget.setLayout(layout)
+        centralWidget.setMinimumSize(600, 400)
         self.setCentralWidget(centralWidget)
 
     def start_batch(self):
@@ -75,9 +75,6 @@ class MainGUI(QMainWindow):
             if process.is_alive():
                 process.terminate()
                 self.update_traffic_lights(key, False)
-                print(f'Terminated {key}')
-            else:
-                print(f'{key} is not alive, omg!')
 
     def pause_batch(self):
         # To pause the batch, suspend all running processes
@@ -96,12 +93,10 @@ class MainGUI(QMainWindow):
         for key, process in self.processes.items():
             process.start()
             self.update_traffic_lights(key, True)  # Set traffic light to green
-            print(f'Started {key}')
 
         for key, process in self.processes.items():
             process.join()
             self.update_traffic_lights(key, False)  # Set traffic light to red
-            print(f'Joined {key}')
 
     def update_traffic_lights(self, process_name, is_running):
         traffic_light = self.trafficLights[process_name]
@@ -111,7 +106,6 @@ class MainGUI(QMainWindow):
         else:
             traffic_light.set_red()
             traffic_light.status = 'red'
-        print(f'Updated {process_name} to {traffic_light.status}')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

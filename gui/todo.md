@@ -11,3 +11,8 @@ comments can be written in the gui at any time of the experiment - even after st
     - camera displays needs to be added
     - glvoe data 
 
+
+- currently not working
+    - the traffic lights are not shown 
+    - metadata is not getting saved properly 
+    - start batch does not end - should i exit it? - think its ok because we need to close using the x icon
