@@ -54,3 +54,4 @@ class MetadataConstants:
 
     TRIALS_PER_BATCH = 1
     BATCHES_PER_EXPERIMENT = 10
+    TRAFFIC_LIGHT_SIZE = 20

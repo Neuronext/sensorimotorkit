@@ -1,7 +1,8 @@
 import sys
 import multiprocessing
 import os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout
+from PyQt5.QtCore import Qt
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
@@ -18,6 +19,7 @@ from common.constants import Paths, Constants, MetadataConstants
 from feature_extraction.apply_tracking import process_body_cam_images
 from test_process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg, capture_board # using test_process.py for now
 
+
 class MainGUI(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -33,6 +35,7 @@ class MainGUI(QMainWindow):
         self.startBtn = QPushButton('Start', self)
         self.stopBtn = QPushButton('Stop', self)
         self.pauseBtn = QPushButton('Pause', self)
+        self.h_layout = QHBoxLayout()
 
         self.trafficLights = {
             'bodycam_left': TrafficLight(),
@@ -55,9 +58,14 @@ class MainGUI(QMainWindow):
         layout.addWidget(self.variableDisplay)
         
         # add traffic lights to layout
-        for key, light in self.trafficLights.items():
-            layout.addWidget(light)
-
+        for key, light in self.trafficLights.items():    
+            label = QLabel(key.replace('_', ' ').title()) 
+            label.setAlignment(Qt.AlignCenter)  
+            self.h_layout.addWidget(label)
+            self.h_layout.addWidget(light)
+        
+        layout.addLayout(self.h_layout)
+        
         # Set main widget
         centralWidget = QWidget()
         centralWidget.setLayout(layout)
@@ -96,16 +104,19 @@ class MainGUI(QMainWindow):
 
         for key, process in self.processes.items():
             process.join()
+            print(key, "joined")
             self.update_traffic_lights(key, False)  # Set traffic light to red
 
     def update_traffic_lights(self, process_name, is_running):
-        traffic_light = self.trafficLights[process_name]
         if is_running:
-            traffic_light.set_green()
-            traffic_light.status = 'green'
+            print("updating traffic light to green")
+            self.trafficLights[process_name].updateColor.emit('green')
+            self.trafficLights[process_name].status = 'green'
         else:
-            traffic_light.set_red()
-            traffic_light.status = 'red'
+            print("updating traffic light to red")
+            self.trafficLights[process_name].updateColor.emit('red')
+            self.trafficLights[process_name].status = 'red'
+      
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
