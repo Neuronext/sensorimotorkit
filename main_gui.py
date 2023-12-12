@@ -40,7 +40,6 @@ class MainGUI(QMainWindow):
             'dartcam': TrafficLight(),
             'gloves': TrafficLight(),
             'eeg': TrafficLight(),
-            'emg': TrafficLight(),
         }
 
         # Connect buttons to functions
@@ -56,8 +55,9 @@ class MainGUI(QMainWindow):
         layout.addWidget(self.variableDisplay)
         
         # add traffic lights to layout
-        for light in self.trafficLights.values():
+        for key, light in self.trafficLights.items():
             layout.addWidget(light)
+            print(f"Added traffic light for {key}")
 
         # Set main widget
         centralWidget = QWidget()
@@ -65,45 +65,53 @@ class MainGUI(QMainWindow):
         self.setCentralWidget(centralWidget)
 
     def start_batch(self):
+        trial_path = self.folderDialog.get_selected_folder()
         for _ in range(MetadataConstants.TRIALS_PER_BATCH): 
-            trial_path = self.folderDialog.get_selected_folder()
             self.run_trial(trial_path)
 
     def stop_batch(self):
         # To stop the batch, terminate all running processes
-        for process in self.processes:
-            process.terminate()
+        for key, process in self.processes.items():
+            if process.is_alive():
+                process.terminate()
+                self.update_traffic_lights(key, False)
+                print(f'Terminated {key}')
+            else:
+                print(f'{key} is not alive, omg!')
 
     def pause_batch(self):
         # To pause the batch, suspend all running processes
-        for process in self.processes:
+        for _, process in self.processes.items():
             process.suspend()
 
     def run_trial(self, trial_path):
         # Run the main trial process
-        self.processes = [
-            multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)),
-            multiprocessing.Process(target=start_bodycam_right, args=(trial_path,)),
-            multiprocessing.Process(target=start_dartcam, args=(trial_path,)),
-            multiprocessing.Process(target=start_gloves, args=(trial_path,)),
-            multiprocessing.Process(target=start_eeg, args=(trial_path,))
-        ]
-        for process in self.processes:
+        self.processes = {
+            "bodycam_left" : multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)),
+            "bodycam_right" : multiprocessing.Process(target=start_bodycam_right, args=(trial_path,)),
+            "dartcam" : multiprocessing.Process(target=start_dartcam, args=(trial_path,)),
+            "gloves" : multiprocessing.Process(target=start_gloves, args=(trial_path,)),
+            "eeg" : multiprocessing.Process(target=start_eeg, args=(trial_path,))
+        }
+        for key, process in self.processes.items():
             process.start()
-            self.update_traffic_lights(process, True)  # Set traffic light to green
+            self.update_traffic_lights(key, True)  # Set traffic light to green
+            print(f'Started {key}')
 
-        for process in self.processes:
+        for key, process in self.processes.items():
             process.join()
-            self.update_traffic_lights(process, False)  # Set traffic light to red
+            self.update_traffic_lights(key, False)  # Set traffic light to red
+            print(f'Joined {key}')
 
-    def update_traffic_lights(self, process, is_running):
-        # Update the traffic light based on process status
-        # Map each process to its corresponding traffic light
-        traffic_light = self.trafficLights[process.name]
+    def update_traffic_lights(self, process_name, is_running):
+        traffic_light = self.trafficLights[process_name]
         if is_running:
             traffic_light.set_green()
+            traffic_light.status = 'green'
         else:
             traffic_light.set_red()
+            traffic_light.status = 'red'
+        print(f'Updated {process_name} to {traffic_light.status}')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

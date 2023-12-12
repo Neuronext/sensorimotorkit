@@ -9,6 +9,7 @@ class TrafficLight(QWidget):
         self.layout.addWidget(self.label)
         self.setLayout(self.layout)
         self.set_red()
+        self.status = 'red'
 
     def set_red(self):
         self.label.setPixmap(QPixmap('../assets/red_dot.jpeg'))
