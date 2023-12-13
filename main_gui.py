@@ -12,15 +12,8 @@ from PyQt5.QtCore import Qt
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
-
-from acquire_data.gloves import gloves
-from acquire_data.eeg import eeg
-from acquire_data.emg import emg
-from acquire_data.images import body_cam, dart_cam
-from common import common_utils
-from common.constants import Paths, Constants, MetadataConstants
-from feature_extraction.apply_tracking import process_body_cam_images
-from test_process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg, capture_board # using test_process.py for now
+from common.constants import Constants, MetadataConstants
+from test_process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg #TODO use process.py 
 
 
 class MainGUI(QMainWindow):
@@ -28,18 +21,17 @@ class MainGUI(QMainWindow):
         super().__init__()
 
         # Initialize UI components
-        self.folderDialog = FolderDialog() #TODO: change this because it needs to be asked per trail
+        self.folderDialog = FolderDialog() #TODO: logic to ask this per batch instead of per trial
         self.variableDisplay = VariableDisplay()
-
-        # Setup layout
         layout = QVBoxLayout()
 
         # Start, Stop, Pause buttons
         self.startBtn = QPushButton('Start', self)
         self.stopBtn = QPushButton('Stop', self)
         self.pauseBtn = QPushButton('Pause', self)
-        self.h_layout = QHBoxLayout()
+        self.traffic_light_layout = QHBoxLayout()        
 
+        # Add traffic lights for each process
         self.trafficLights = {
             'bodycam_left': TrafficLight(),
             'bodycam_right': TrafficLight(),
@@ -53,22 +45,21 @@ class MainGUI(QMainWindow):
         self.stopBtn.clicked.connect(self.stop_batch)
         self.pauseBtn.clicked.connect(self.pause_batch)
 
+        # add traffic lights to layout
+        for key, light in self.trafficLights.items():    
+            label = QLabel(key.replace('_', ' ').title()) 
+            label.setAlignment(Qt.AlignCenter)  
+            self.traffic_light_layout.addWidget(label)
+            self.traffic_light_layout.addWidget(light)
+
         # Add components to layout
         layout.addWidget(self.startBtn)
         layout.addWidget(self.stopBtn)
         layout.addWidget(self.pauseBtn)
         layout.addWidget(self.folderDialog)
-        layout.addWidget(self.variableDisplay)
-        
-        # add traffic lights to layout
-        for key, light in self.trafficLights.items():    
-            label = QLabel(key.replace('_', ' ').title()) 
-            label.setAlignment(Qt.AlignCenter)  
-            self.h_layout.addWidget(label)
-            self.h_layout.addWidget(light)
-        
-        layout.addLayout(self.h_layout)
-        
+
+        self.update_metadata_constants(layout)
+        layout.addLayout(self.traffic_light_layout)
         self.add_metadata_fields(layout)
 
         # Set main widget
@@ -76,6 +67,16 @@ class MainGUI(QMainWindow):
         centralWidget.setLayout(layout)
         centralWidget.setMinimumSize(600, 400)
         self.setCentralWidget(centralWidget)
+
+    #TODO remove variable display function
+    def update_metadata_constants(self, layout):
+        form_layout = QFormLayout()
+        
+        # currently only acquire time is a variable, can add more
+        self.acquire_time = QLineEdit(str(Constants.ACQUIRE_TIME))
+        form_layout.addRow("Acquire Time:", self.acquire_time)
+        layout.addLayout(form_layout)
+
 
     def add_metadata_fields(self, layout):
         form_layout = QFormLayout()
@@ -106,7 +107,7 @@ class MainGUI(QMainWindow):
         with open('metadata.csv', mode='a', newline='\n') as file:
             writer = csv.writer(file)
             
-            # Write header if file doesn't exist
+            # if file doesn't exist, write headers
             if not file_exists:
                 writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Comments'])
             
@@ -122,6 +123,7 @@ class MainGUI(QMainWindow):
     
     def start_batch(self):
         trial_path = self.folderDialog.get_selected_folder()
+        #TODO use the self.acquire_time to get the acquire time, convert to int
         for _ in range(MetadataConstants.TRIALS_PER_BATCH): 
             self.run_trial(trial_path)
 
