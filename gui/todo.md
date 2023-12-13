@@ -17,3 +17,14 @@ comments can be written in the gui at any time of the experiment - even after st
     - counter for the number of trials is not shown
     - metadata some fields need to be populated only once per batch, others per trial <ask_tansu>
     - start batch does not end - should i exit it? - think its ok because we need to close using the x icon
+
+
+- visualization of the data stream
+- gui should look nice
+    - the buttons should change color when clicked
+    - the traffic lights should poll on the process properly
+    - user should be able to change the items for which they want to see the traffic lights
+    - traffic lights should be circular
+    - the forms should looks neater, comments should have more space than the rest
+    - the forms should be in a scrollable window
+    - layout - some should go on the right side instead of below - decide and cleanup
