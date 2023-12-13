@@ -1,15 +1,18 @@
 import sys
 import multiprocessing
 import os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout
+import datetime
+import csv
+
+# import PyQt5 modules
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout
 from PyQt5.QtCore import Qt
+
+# import custom modules
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
 
-
-
-# import custom modules
 from acquire_data.gloves import gloves
 from acquire_data.eeg import eeg
 from acquire_data.emg import emg
@@ -66,12 +69,57 @@ class MainGUI(QMainWindow):
         
         layout.addLayout(self.h_layout)
         
+        self.add_metadata_fields(layout)
+
         # Set main widget
         centralWidget = QWidget()
         centralWidget.setLayout(layout)
         centralWidget.setMinimumSize(600, 400)
         self.setCentralWidget(centralWidget)
 
+    def add_metadata_fields(self, layout):
+        form_layout = QFormLayout()
+
+        # Metadata fields
+        self.date_edit = QLineEdit(datetime.datetime.now().strftime("%Y-%m-%d"))
+        self.participant_id_edit = QLineEdit()
+        self.handedness_edit = QLineEdit()
+        self.age_edit = QLineEdit()
+        self.gender_edit = QLineEdit()
+        self.comments_edit = QLineEdit()
+
+        form_layout.addRow("Date:", self.date_edit)
+        form_layout.addRow("Participant ID:", self.participant_id_edit)
+        form_layout.addRow("Handedness:", self.handedness_edit)
+        form_layout.addRow("Age:", self.age_edit)
+        form_layout.addRow("Gender:", self.gender_edit)
+        form_layout.addRow("Comments:", self.comments_edit)
+
+        # Add the form layout to the main layout
+        layout.addLayout(form_layout)
+
+
+    def append_metadata_to_csv(self):
+        # Check if file exists, and whether we need to write headers
+        file_exists = os.path.isfile('metadata.csv')
+        
+        with open('metadata.csv', mode='a', newline='\n') as file:
+            writer = csv.writer(file)
+            
+            # Write header if file doesn't exist
+            if not file_exists:
+                writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Comments'])
+            
+            # Write data
+            writer.writerow([
+                self.date_edit.text(),
+                self.participant_id_edit.text(),
+                self.handedness_edit.text(),
+                self.age_edit.text(),
+                self.gender_edit.text(),
+                self.comments_edit.text()
+            ])
+    
     def start_batch(self):
         trial_path = self.folderDialog.get_selected_folder()
         for _ in range(MetadataConstants.TRIALS_PER_BATCH): 
@@ -106,6 +154,9 @@ class MainGUI(QMainWindow):
             process.join()
             print(key, "joined")
             self.update_traffic_lights(key, False)  # Set traffic light to red
+        
+        print("Adding metadata to csv")
+        self.append_metadata_to_csv()
 
     def update_traffic_lights(self, process_name, is_running):
         if is_running:
