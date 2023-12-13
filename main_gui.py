@@ -134,6 +134,10 @@ class MainGUI(QMainWindow):
         # Reset the label after the batch is completed
         self.trialCountLabel.setText(f"Trial: 0/{MetadataConstants.TRIALS_PER_BATCH}")
 
+        # Add metadata to csv
+        print("Adding metadata to csv")
+        self.append_metadata_to_csv()
+
     def stop_batch(self):
         # To stop the batch, terminate all running processes
         for key, process in self.processes.items():
@@ -164,8 +168,6 @@ class MainGUI(QMainWindow):
             print(key, "joined")
             self.update_traffic_lights(key, False)  # Set traffic light to red
         
-        print("Adding metadata to csv")
-        self.append_metadata_to_csv()
 
     def update_traffic_lights(self, process_name, is_running):
         if is_running:
