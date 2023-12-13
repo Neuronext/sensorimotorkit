@@ -26,6 +26,7 @@ class MainGUI(QMainWindow):
         layout = QVBoxLayout()
 
         # Start, Stop, Pause buttons
+        self.trialCountLabel = QLabel(f"Trial: 0/{MetadataConstants.TRIALS_PER_BATCH}")
         self.startBtn = QPushButton('Start', self)
         self.stopBtn = QPushButton('Stop', self)
         self.pauseBtn = QPushButton('Pause', self)
@@ -53,6 +54,7 @@ class MainGUI(QMainWindow):
             self.traffic_light_layout.addWidget(light)
 
         # Add components to layout
+        layout.addWidget(self.trialCountLabel)
         layout.addWidget(self.startBtn)
         layout.addWidget(self.stopBtn)
         layout.addWidget(self.pauseBtn)
@@ -124,8 +126,13 @@ class MainGUI(QMainWindow):
     def start_batch(self):
         trial_path = self.folderDialog.get_selected_folder()
         #TODO use the self.acquire_time to get the acquire time, convert to int
-        for _ in range(MetadataConstants.TRIALS_PER_BATCH): 
+        for trial in range(MetadataConstants.TRIALS_PER_BATCH): 
+            self.trialCountLabel.setText(f"Trial: {trial+1}/{MetadataConstants.TRIALS_PER_BATCH}")
+            QApplication.processEvents()
             self.run_trial(trial_path)
+
+        # Reset the label after the batch is completed
+        self.trialCountLabel.setText(f"Trial: 0/{MetadataConstants.TRIALS_PER_BATCH}")
 
     def stop_batch(self):
         # To stop the batch, terminate all running processes
@@ -169,6 +176,7 @@ class MainGUI(QMainWindow):
             print("updating traffic light to red")
             self.trafficLights[process_name].updateColor.emit('red')
             self.trafficLights[process_name].status = 'red'
+        QApplication.processEvents()
       
 
 if __name__ == '__main__':

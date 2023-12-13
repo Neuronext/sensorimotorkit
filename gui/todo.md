@@ -14,5 +14,6 @@ comments can be written in the gui at any time of the experiment - even after st
 
 - currently not working
     - the traffic lights are not shown 
+    - counter for the number of trials is not shown
     - metadata some fields need to be populated only once per batch, others per trial <ask_tansu>
     - start batch does not end - should i exit it? - think its ok because we need to close using the x icon
