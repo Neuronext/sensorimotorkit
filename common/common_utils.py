@@ -32,6 +32,8 @@ class TrialManager:
     @staticmethod
     def init_structure(trial_path):
         for name, relative_path in Paths.items():
+            if relative_path is None:
+                continue #TODO please fix this
             raw_path = os.path.normpath(os.path.join(trial_path, relative_path))
             full_path = os.path.abspath(raw_path)
             os.makedirs(full_path, exist_ok=True)

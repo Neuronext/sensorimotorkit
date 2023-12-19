@@ -12,11 +12,9 @@ from PyQt5.QtCore import Qt
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
-from common.constants import Constants, MetadataConstants
+from common.constants import Constants, MetadataConstants, Components
 from common import common_utils
-from test_process import start_gloves, start_eeg #TODO use process.py 
-from test_process import start_bodycam_left, start_bodycam_right
-from process import start_dartcam
+from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
 
 
 class MainGUI(QMainWindow):
@@ -36,13 +34,20 @@ class MainGUI(QMainWindow):
         self.traffic_light_layout = QHBoxLayout()        
 
         # Add traffic lights for each process
-        self.trafficLights = {
-            'bodycam_left': TrafficLight(),
-            'bodycam_right': TrafficLight(),
-            'dartcam': TrafficLight(),
-            'gloves': TrafficLight(),
-            'eeg': TrafficLight(),
-        }
+        self.trafficLights = {}
+        self.processes = {}
+
+        # self.trafficLights = {
+        #     'bodycam_left': TrafficLight(),
+        #     'bodycam_right': TrafficLight(),
+        #     'dartcam': TrafficLight(),
+        #     'gloves': TrafficLight(),
+        #     'eeg': TrafficLight(),
+        # }
+
+        for component, enabled in Components.ENABLED_COMPONENTS.items():
+            if enabled:
+                self.trafficLights[component] = TrafficLight()
 
         # Connect buttons to functions
         self.startBtn.clicked.connect(self.start_batch)
@@ -107,9 +112,9 @@ class MainGUI(QMainWindow):
 
     def append_metadata_to_csv(self):
         # Check if file exists, and whether we need to write headers
-        file_exists = os.path.isfile('metadata.csv')
+        file_exists = os.path.isfile(MetadataConstants.METADATA_FILE_NAME)
         
-        with open('metadata.csv', mode='a', newline='\n') as file:
+        with open(MetadataConstants.METADATA_FILE_NAME, mode='a', newline='\n') as file:
             writer = csv.writer(file)
             
             # if file doesn't exist, write headers
@@ -123,7 +128,7 @@ class MainGUI(QMainWindow):
                 self.handedness_edit.text(),
                 self.age_edit.text(),
                 self.gender_edit.text(),
-                self.folderDialog.get_selected_folder(),
+                os.path.normpath(self.folderDialog.get_selected_folder()),
                 self.comments_edit.text()
             ])
     
@@ -156,16 +161,25 @@ class MainGUI(QMainWindow):
 
     def run_trial(self):
         # Run the main trial process
-        print(f"data_path : {self.folderDialog.get_selected_folder()}")
-        trial_path = common_utils.TrialManager.setup_trial(gui=True, data_path=self.folderDialog.get_selected_folder())
+        
+        data_path = os.path.normpath(self.folderDialog.get_selected_folder())
+        print(f"data_path : {data_path}")
+        trial_path = common_utils.TrialManager.setup_trial(gui=True, data_path=data_path)
 
-        self.processes = {
-            "bodycam_left" : multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)),
-            "bodycam_right" : multiprocessing.Process(target=start_bodycam_right, args=(trial_path,)),
-            "dartcam" : multiprocessing.Process(target=start_dartcam, args=(trial_path,)),
-            "gloves" : multiprocessing.Process(target=start_gloves, args=(trial_path,)),
-            "eeg" : multiprocessing.Process(target=start_eeg, args=(trial_path,))
-        }
+
+        for component, enabled in Components.ENABLED_COMPONENTS.items():
+            if enabled:
+                process_function = globals()[f"start_{component}"] 
+                self.processes[component] = multiprocessing.Process(target=process_function, args=(trial_path,))
+
+        # self.processes = {
+        #     "bodycam_left" : multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)),
+        #     "bodycam_right" : multiprocessing.Process(target=start_bodycam_right, args=(trial_path,)),
+        #     "dartcam" : multiprocessing.Process(target=start_dartcam, args=(trial_path,)),
+        #     "gloves" : multiprocessing.Process(target=start_gloves, args=(trial_path,)),
+        #     "eeg" : multiprocessing.Process(target=start_eeg, args=(trial_path,))
+        # }
+                
         for key, process in self.processes.items():
             process.start()
             self.update_traffic_lights(key, True)  # Set traffic light to green

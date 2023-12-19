@@ -1,3 +1,4 @@
+import os
 from PyQt5.QtWidgets import QWidget, QPushButton, QFileDialog, QLabel, QVBoxLayout
 
 class FolderDialog(QWidget):
@@ -12,7 +13,8 @@ class FolderDialog(QWidget):
         self.layout.addWidget(self.btn)
         self.layout.addWidget(self.label)
         self.setLayout(self.layout)
-        self.folder_path = '../data'
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        self.folder_path = os.path.join(script_dir, '..', 'data')
 
     def open_dialog(self):
         self.folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder')
