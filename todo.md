@@ -10,8 +10,7 @@
 - output should be formatted in standardized format example compatible with eeglab
 - push all the images to gcloud/aws on a daily basis, create cron job
 
-### enhancement
-- can probably use Python Taskflow in order to parallelize data acquisition for multiple modalities
+### enhancements
 - expand the tracking to include more than one person
 - add better logging
     - all print statements should have a [MAIN/MODALITY] prefix associated with it
