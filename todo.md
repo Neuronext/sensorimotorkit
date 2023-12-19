@@ -1,3 +1,8 @@
+### pratiksha todo
+- changes in gui/todo.md
+- update readme with the gui changes
+- codebase cleanup
+
 ### retest
 - retest the frame rates by changing binning and resolution
 - testing if dart camera is working with the body cameras
@@ -15,3 +20,10 @@
 - add better logging
     - all print statements should have a [MAIN/MODALITY] prefix associated with it
     - refactor all the print statements to use the logging module
+
+### ask jack for the following
+- eeg + emg issues
+    - they are not working together 
+    - we do not stream all the channels currently
+    - 16 channels of the data need to go into 16 individual files for these modalities
+
