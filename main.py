@@ -4,7 +4,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from common import common_utils
-from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg, capture_board
+from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg, capture_board, process_body_cam_images
 
 
 def run_trial(trial_path):
@@ -25,6 +25,10 @@ def run_trial(trial_path):
 
     #TODO capture_board()
 
+
+def run_feature_extraction(trial_path):
+    print("Running feature extraction")
+    process_body_cam_images(trial_path)
 
 if __name__ == '__main__':
     

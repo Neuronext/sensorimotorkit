@@ -41,7 +41,7 @@ class TrialManager:
 
     @staticmethod
     def setup_trial(gui=False, data_path=None):
-        # sloppy code incoming...., sorry
+        #TODO fix sloppy code
         trial_base_path = TrialManager.get_trial_base_path(gui=gui, data_path=data_path)
         trial_path = TrialManager.create_trial_path(trial_base_path)
         TrialManager.init_structure(trial_path)
