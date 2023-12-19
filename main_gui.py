@@ -40,11 +40,6 @@ class MainGUI(QMainWindow):
         self.setWindowIcon(QIcon(self.icon_path))
         self.setWindowTitle('Sensorimotor Kit')
 
-        # Custom Title Bar
-        # self.titleBar = CustomTitleBar(self)
-        # self.setMenuWidget(self.titleBar)
-
-
         # Initialize UI components
         self.folderDialog = FolderDialog() 
         self.variableDisplay = VariableDisplay()
