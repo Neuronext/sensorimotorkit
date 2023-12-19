@@ -1,3 +1,4 @@
+# DEPRECATED: This file is deprecated and will be removed in the future. Please use main.py at the root of this directory instead.
 import datetime
 import multiprocessing
 import cv2
