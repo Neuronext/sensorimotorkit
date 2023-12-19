@@ -3,10 +3,11 @@ import multiprocessing
 import os
 import datetime
 import csv
+import time
 
 # import PyQt5 modules
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 
 # import custom modules
 from gui.folder_dialog import FolderDialog
@@ -36,14 +37,6 @@ class MainGUI(QMainWindow):
         # Add traffic lights for each process
         self.trafficLights = {}
         self.processes = {}
-
-        # self.trafficLights = {
-        #     'bodycam_left': TrafficLight(),
-        #     'bodycam_right': TrafficLight(),
-        #     'dartcam': TrafficLight(),
-        #     'gloves': TrafficLight(),
-        #     'eeg': TrafficLight(),
-        # }
 
         for component, enabled in Components.ENABLED_COMPONENTS.items():
             if enabled:
@@ -139,6 +132,8 @@ class MainGUI(QMainWindow):
             self.trialCountLabel.setText(f"Trial: {trial+1}/{MetadataConstants.TRIALS_PER_BATCH}")
             QApplication.processEvents()
             self.run_trial()
+            # sleep for 1 second between trials
+            time.sleep(MetadataConstants.SLEEP_TIME_BETWEEN_TRIALS)
 
         # Reset the label after the batch is completed
         self.trialCountLabel.setText(f"Trial: 0/{MetadataConstants.TRIALS_PER_BATCH}")
@@ -171,24 +166,16 @@ class MainGUI(QMainWindow):
             if enabled:
                 process_function = globals()[f"start_{component}"] 
                 self.processes[component] = multiprocessing.Process(target=process_function, args=(trial_path,))
-
-        # self.processes = {
-        #     "bodycam_left" : multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)),
-        #     "bodycam_right" : multiprocessing.Process(target=start_bodycam_right, args=(trial_path,)),
-        #     "dartcam" : multiprocessing.Process(target=start_dartcam, args=(trial_path,)),
-        #     "gloves" : multiprocessing.Process(target=start_gloves, args=(trial_path,)),
-        #     "eeg" : multiprocessing.Process(target=start_eeg, args=(trial_path,))
-        # }
                 
         for key, process in self.processes.items():
             process.start()
             self.update_traffic_lights(key, True)  # Set traffic light to green
 
+        #TODO Adding this makes the GUI becomes unresponsive when the processes are running
         for key, process in self.processes.items():
             process.join()
             print(key, "joined")
-            self.update_traffic_lights(key, False)  # Set traffic light to red
-        
+            self.update_traffic_lights(key, False)  # Set traffic light to red        
 
     def update_traffic_lights(self, process_name, is_running):
         if is_running:

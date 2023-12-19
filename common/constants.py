@@ -5,6 +5,9 @@ class MetadataConstants:
     BATCHES_PER_EXPERIMENT = 10
     TRAFFIC_LIGHT_SIZE = 20
     METADATA_FILE_NAME = 'metadata.csv'
+    POLLING_INTERVAL = 100 # ms
+    SLEEP_TIME_BETWEEN_TRIALS = 3 # s
+
     ENABLE_BODY_CAM = True
     ENABLE_DART_CAM = True
     ENABLE_EEG = False
