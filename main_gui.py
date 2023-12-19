@@ -8,33 +8,58 @@ import time
 # import PyQt5 modules
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout
 from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QIcon
+
 
 # import custom modules
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
+from gui.custom_title_bar import CustomTitleBar
 from common.constants import Constants, MetadataConstants, Components
 from common import common_utils
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
+
+
+def load_stylesheet(file_path):
+    with open(file_path, "r") as file:
+        return file.read()
 
 
 class MainGUI(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        # Load and apply stylesheet
+        stylesheet = load_stylesheet("gui/style.css")
+        self.setStyleSheet(stylesheet)
+
+        # Set window icon
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        self.icon_path = os.path.join(script_dir, 'assets', 'sensorimotorkit.png')
+        self.setWindowIcon(QIcon(self.icon_path))
+        self.setWindowTitle('Sensorimotor Kit')
+
+        # Custom Title Bar
+        # self.titleBar = CustomTitleBar(self)
+        # self.setMenuWidget(self.titleBar)
+
+
         # Initialize UI components
-        self.folderDialog = FolderDialog() #TODO: logic to ask this per batch instead of per trial
+        self.folderDialog = FolderDialog() 
         self.variableDisplay = VariableDisplay()
         layout = QVBoxLayout()
 
         # Start, Stop, Pause buttons
         self.trialCountLabel = QLabel(f"Trial: 0/{MetadataConstants.TRIALS_PER_BATCH}")
+        
+        buttonsLayout = QHBoxLayout()
         self.startBtn = QPushButton('Start', self)
         self.stopBtn = QPushButton('Stop', self)
         self.pauseBtn = QPushButton('Pause', self)
+        
         self.traffic_light_layout = QHBoxLayout()        
 
-        # Add traffic lights for each process
         self.trafficLights = {}
         self.processes = {}
 
@@ -47,6 +72,11 @@ class MainGUI(QMainWindow):
         self.stopBtn.clicked.connect(self.stop_batch)
         self.pauseBtn.clicked.connect(self.pause_batch)
 
+        buttonsLayout.addWidget(self.startBtn)
+        buttonsLayout.addWidget(self.stopBtn)
+        buttonsLayout.addWidget(self.pauseBtn)
+        
+
         # add traffic lights to layout
         for key, light in self.trafficLights.items():    
             label = QLabel(key.replace('_', ' ').title()) 
@@ -56,9 +86,7 @@ class MainGUI(QMainWindow):
 
         # Add components to layout
         layout.addWidget(self.trialCountLabel)
-        layout.addWidget(self.startBtn)
-        layout.addWidget(self.stopBtn)
-        layout.addWidget(self.pauseBtn)
+        layout.addLayout(buttonsLayout)
         layout.addWidget(self.folderDialog)
 
         self.update_metadata_constants(layout)

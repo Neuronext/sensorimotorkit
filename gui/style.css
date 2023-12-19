@@ -1,0 +1,62 @@
+/* Global Styles */
+QWidget {
+    background-color: whitesmoke;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Traffic Lights - Red & Green */
+.TrafficLight {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px; 
+    border: 2px solid #073B4C; 
+}
+
+.TrafficLight[status="red"] {
+    background-color: red;
+    border-radius: 15px;
+}
+
+.TrafficLight[status="green"] {
+    background-color: green;
+    border-radius: 15px;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: lightblue;
+    border: none;
+    border-radius: 10px;
+    padding: 5px 10px;
+    margin: 5px;
+}
+
+QPushButton:hover {
+    background-color: skyblue;
+}
+
+/* Labels and Forms */
+QLabel {
+    font-weight: bold;
+}
+
+QLineEdit {
+    border: 1px solid grey;
+    border-radius: 5px;
+}
+
+/* Custom Title Bar */
+.CustomTitleBar {
+    background-color: #444444;
+}
+
+/* Title Bar Buttons */
+.CustomTitleBar QPushButton {
+    background-color: #666666;
+    border: none;
+    border-radius: 5px;
+}
+
+.CustomTitleBar QPushButton:hover {
+    background-color: #777777;
+}
