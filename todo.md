@@ -2,6 +2,7 @@
 - changes in gui/todo.md
 - update readme with the gui changes
 - codebase cleanup
+- cleanup the print statements
 
 ### retest
 - retest the frame rates by changing binning and resolution
