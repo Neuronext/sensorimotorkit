@@ -14,8 +14,11 @@ class TrialManager:
         return datetime.now().strftime('%Y-%m-%d')
 
     @staticmethod
-    def get_trial_base_path():
-        base_path = TrialManager.get_base_path()
+    def get_trial_base_path(gui=False, data_path=None):
+        if gui:
+            base_path = data_path
+        else:
+            base_path = TrialManager.get_base_path()
         today_str = TrialManager.get_today_str()
         return os.path.join(base_path, today_str)
 
@@ -35,8 +38,9 @@ class TrialManager:
             # print(f"{name} path {full_path} created")
 
     @staticmethod
-    def setup_trial():
-        trial_base_path = TrialManager.get_trial_base_path()
+    def setup_trial(gui=False, data_path=None):
+        # sloppy code incoming...., sorry
+        trial_base_path = TrialManager.get_trial_base_path(gui=gui, data_path=data_path)
         trial_path = TrialManager.create_trial_path(trial_base_path)
         TrialManager.init_structure(trial_path)
         return trial_path

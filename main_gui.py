@@ -13,7 +13,10 @@ from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
 from common.constants import Constants, MetadataConstants
-from test_process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg #TODO use process.py 
+from common import common_utils
+from test_process import start_gloves, start_eeg #TODO use process.py 
+from test_process import start_bodycam_left, start_bodycam_right
+from process import start_dartcam
 
 
 class MainGUI(QMainWindow):
@@ -111,7 +114,7 @@ class MainGUI(QMainWindow):
             
             # if file doesn't exist, write headers
             if not file_exists:
-                writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Comments'])
+                writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Trial Folder' 'Comments'])
             
             # Write data
             writer.writerow([
@@ -120,16 +123,17 @@ class MainGUI(QMainWindow):
                 self.handedness_edit.text(),
                 self.age_edit.text(),
                 self.gender_edit.text(),
+                self.folderDialog.get_selected_folder(),
                 self.comments_edit.text()
             ])
     
     def start_batch(self):
-        trial_path = self.folderDialog.get_selected_folder()
+
         #TODO use the self.acquire_time to get the acquire time, convert to int
         for trial in range(MetadataConstants.TRIALS_PER_BATCH): 
             self.trialCountLabel.setText(f"Trial: {trial+1}/{MetadataConstants.TRIALS_PER_BATCH}")
             QApplication.processEvents()
-            self.run_trial(trial_path)
+            self.run_trial()
 
         # Reset the label after the batch is completed
         self.trialCountLabel.setText(f"Trial: 0/{MetadataConstants.TRIALS_PER_BATCH}")
@@ -150,8 +154,11 @@ class MainGUI(QMainWindow):
         for _, process in self.processes.items():
             process.suspend()
 
-    def run_trial(self, trial_path):
+    def run_trial(self):
         # Run the main trial process
+        print(f"data_path : {self.folderDialog.get_selected_folder()}")
+        trial_path = common_utils.TrialManager.setup_trial(gui=True, data_path=self.folderDialog.get_selected_folder())
+
         self.processes = {
             "bodycam_left" : multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)),
             "bodycam_right" : multiprocessing.Process(target=start_bodycam_right, args=(trial_path,)),
@@ -171,11 +178,11 @@ class MainGUI(QMainWindow):
 
     def update_traffic_lights(self, process_name, is_running):
         if is_running:
-            print("updating traffic light to green")
+            # print("updating traffic light to green")
             self.trafficLights[process_name].updateColor.emit('green')
             self.trafficLights[process_name].status = 'green'
         else:
-            print("updating traffic light to red")
+            # print("updating traffic light to red")
             self.trafficLights[process_name].updateColor.emit('red')
             self.trafficLights[process_name].status = 'red'
         QApplication.processEvents()

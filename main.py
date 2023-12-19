@@ -28,7 +28,7 @@ def run_trial(trial_path):
 
 if __name__ == '__main__':
     
-    trial_path = common_utils.TrialManager.setup_trial()
+    trial_path = common_utils.TrialManager.setup_trial(gui=False, data_path=None)
     print(f'Initialized the Trial Path: {os.path.normpath(trial_path)}')
 
     run_trial(trial_path) #TODO avoid passing trial_path everywhere

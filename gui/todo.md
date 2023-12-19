@@ -1,3 +1,10 @@
+- one round of testing to make sure
+    - data folder is getting populated properly = this needs to reflect in csv file as well 
+    - all the information is stored properly in datafolder 
+    - all the process are polled properly 
+    - the user should have access to what process needs to be polled  - should be able to add in constants?
+    - the gui should look pretty - last thing to do
+
 - need to interface the gui from the main.py 
 - folder to save
     - this needs to be a popup 

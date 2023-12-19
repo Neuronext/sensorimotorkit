@@ -12,10 +12,11 @@ class FolderDialog(QWidget):
         self.layout.addWidget(self.btn)
         self.layout.addWidget(self.label)
         self.setLayout(self.layout)
+        self.folder_path = '../data'
 
     def open_dialog(self):
-        folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder')
-        self.label.setText(f'Folder Path: {folder_path}')
+        self.folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder')
+        self.label.setText(f'Folder Path: {self.folder_path}')
     
     def get_selected_folder(self):
-        return self.label.text().split(' ')[-1]
+        return self.folder_path
