@@ -4,24 +4,24 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from common import common_utils
+from common.constants import Components
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg, capture_board, process_body_cam_images
 
 
 def run_trial(trial_path):
 
-    processes = [
-            multiprocessing.Process(target=start_bodycam_left, args=(trial_path,)),
-            multiprocessing.Process(target=start_bodycam_right, args=(trial_path,)),
-            multiprocessing.Process(target=start_dartcam, args=(trial_path,)),
-            multiprocessing.Process(target=start_gloves, args=(trial_path,)),
-            multiprocessing.Process(target=start_eeg, args=(trial_path,))
-        ]
-    
-    for process in processes:
+    processes = {}
+    for component, enabled in Components.ENABLED_COMPONENTS.items():
+        if enabled:
+            process_function = globals()[f"start_{component}"] 
+            processes[component] = multiprocessing.Process(target=process_function, args=(trial_path,))
+            
+    for _, process in processes.items():
         process.start()
 
-    for process in processes:
+    for _, process in processes.items():
         process.join()
+
 
     #TODO capture_board()
 
