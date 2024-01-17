@@ -15,7 +15,7 @@ class MetadataConstants:
     ENABLE_GLOVES = False
     ENABLE_EYES = True
 
-    CAMERA = "spinview" # or "opencv"
+    CAMERA = "opencv" # "spinview" or "opencv"
 
 # PLEASE DO NOT CHANGE THE FOLLOWING
 class Components:

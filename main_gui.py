@@ -94,7 +94,6 @@ class MainGUI(QMainWindow):
         centralWidget.setMinimumSize(600, 400)
         self.setCentralWidget(centralWidget)
 
-    #TODO remove variable display function
     def update_metadata_constants(self, layout):
         form_layout = QFormLayout()
         
@@ -150,7 +149,6 @@ class MainGUI(QMainWindow):
     
     def start_batch(self):
 
-        #TODO use the self.acquire_time to get the acquire time, convert to int
         for trial in range(MetadataConstants.TRIALS_PER_BATCH): 
             self.trialCountLabel.setText(f"Trial: {trial+1}/{MetadataConstants.TRIALS_PER_BATCH}")
             QApplication.processEvents()
