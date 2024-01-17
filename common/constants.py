@@ -6,7 +6,7 @@ class MetadataConstants:
     TRAFFIC_LIGHT_SIZE = 20
     METADATA_FILE_NAME = 'metadata.csv'
     POLLING_INTERVAL = 100 # ms
-    SLEEP_TIME_BETWEEN_TRIALS = 3 # s
+    SLEEP_TIME_BETWEEN_TRIALS = 1 # s
 
     ENABLE_BODY_CAM = True
     ENABLE_DART_CAM = True
@@ -14,6 +14,8 @@ class MetadataConstants:
     ENABLE_EMG = False
     ENABLE_GLOVES = False
     ENABLE_EYES = True
+
+    CAMERA = "spinview" # or "opencv"
 
 # PLEASE DO NOT CHANGE THE FOLLOWING
 class Components:
