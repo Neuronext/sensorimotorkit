@@ -2,11 +2,10 @@
 class MetadataConstants:
 
     TRIALS_PER_BATCH = 2
-    BATCHES_PER_EXPERIMENT = 10
-    TRAFFIC_LIGHT_SIZE = 20
-    METADATA_FILE_NAME = 'metadata.csv'
     POLLING_INTERVAL = 100 # ms
     SLEEP_TIME_BETWEEN_TRIALS = 1 # s
+
+    METADATA_FILE_NAME = 'metadata.csv'
 
     ENABLE_BODY_CAM = True
     ENABLE_DART_CAM = True
@@ -53,6 +52,9 @@ class Paths:
 
 # Other constants
 class Constants:
+
+    # GUI
+    TRAFFIC_LIGHT_SIZE = 20 # pixels
 
     # Camera
     ACQUIRE_TIME = 1 # in seconds
