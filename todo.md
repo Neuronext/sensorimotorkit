@@ -1,10 +1,15 @@
 ### todo
-- flowchart needs to be updated with the documentation 
 - add a dropdown for target selection in the GUI 
-- output should be formatted in standardized format example compatible with eeglab
+- fix the drift in mediapipe
+    - check if it is coming from the training data 
+    - check if you are able to train mediapipe further for angled data, from huggingface 
+- check for emotional decoding module from meta, check if it has facial detection module
+- check if finegrained hand data can be obtained, especially to track a person exploring an aobject in their hand
+- check for output compatibility with eeglab, erplab, fieldtrip, update documentation and readme accordingly 
 - gui not responding when collecting data
-- product links need to be added to the documentation
 - retest components of the kit
+- flowchart needs to be updated with the documentation <need_help_jack>
+- product links need to be added to the documentation <need_help_jack>
 
 ### <ask_jack> for the following
 - eeg + emg issues
