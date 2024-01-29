@@ -1,7 +1,7 @@
 # constant.py
 class MetadataConstants:
 
-    TRIALS_PER_BATCH = 2
+    TRIALS_PER_BATCH = 3
     BATCHES_PER_EXPERIMENT = 10
     TRAFFIC_LIGHT_SIZE = 20
     METADATA_FILE_NAME = 'metadata.csv'
@@ -15,7 +15,7 @@ class MetadataConstants:
     ENABLE_GLOVES = False
     ENABLE_EYES = True
 
-    CAMERA = "opencv" # "spinview" or "opencv"
+    CAMERA = "spinview" # "spinview" or "opencv"
 
 # PLEASE DO NOT CHANGE THE FOLLOWING
 class Components:
@@ -55,7 +55,7 @@ class Paths:
 class Constants:
 
     # Camera
-    ACQUIRE_TIME = 1 # in seconds
+    ACQUIRE_TIME = 10 # in seconds
     FRAME_RATE_BODY_CAM = 120 # Hz
     FRAME_RATE_DART_CAM = 30 # Hz
     RESOLUTION_BODY_CAM = (600, 960) # (height, width) in pixels
