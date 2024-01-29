@@ -4,10 +4,11 @@ SensorimotorKit is a versatile toolbox designed to facilitate the recording and 
 ## System specifications
 - RAM: Minimum 32 GB
 - Operating System: 64-bit Windows
+- Storage: Minimum 250 GB
 - Input Port Requirements: Cyton board, USB 3.0, Bluetooth
 
 ## Set up
-We recommend using Conda to setup a dedicated environment for SensorimotorKit-related tasks.
+We recommend using [Conda](https://docs.conda.io/en/latest/) to setup a dedicated environment for SensorimotorKit-related tasks.
 
 - In order to install Conda follow the steps in the documentation below
     - [Windows](https://conda.io/projects/conda/en/latest/user-guide/install/windows.html)
@@ -23,17 +24,17 @@ We recommend using Conda to setup a dedicated environment for SensorimotorKit-re
     - `python main.py`
 
 ## Structure of the Kit
-- The main script is `sensorimotorkit/main.py`
+- The GUI module is located under `sensorimotorkit/gui`. It is responsible for collecting metadata from the user and starting the data acquisition module. The GUI can be invoked by running the main script `sensorimotorkit/main_gui.py`
 - The data acquisition module can be found under `sensorimotorkit/acquire_data`
-- Utilities, constants and configurations are stored under `sensorimotorkit/common`
+- Constants, utilities and configurations are stored under `sensorimotorkit/common`
 - Post data acquisition we apply feature extraction, using the module `sensorimotorkit/feature_extraction`
 
 ## Data
 - Data is stored under `sensorimotorkit/data`
 - Data is stored in the following format:
     - `sensorimotorkit/data/<date>/<trial_id>/<modality>/<file_name>.csv`
-    - `sensorimotorkit/data/<date>/<trial_id>/<modality>/<body_cam/dart_cam>/<image_name>.png`
-- Here the `modality` includes images, eeg, emg, glove, eyes
+    - `sensorimotorkit/data/<date>/<trial_id>/<modality>/<raw>/frame_<timestamp>.png`
+- Here the `modality` includes eeg, emg, glove, eyes, body camera and dart cameras.
 
 ## Flow of the program
 - The main script `sensorimotorkit/main.py` is the entry point of the program
@@ -45,4 +46,4 @@ We recommend using Conda to setup a dedicated environment for SensorimotorKit-re
 ## Tracking
 - We use [Google Mediapipe](https://developers.google.com/mediapipe) for tracking
 - We simply infer the landmarks from mediapipe for our feature extraction
-- Tracking aims to infer 33 landmarks from the images which are then overlayed on the image and stored as `sensorimotorkit/data/<date>/<trial_id>/<modality>/<body_cam>/<tracked_image>.png`
+- Tracking aims to infer 33 landmarks from the images which are then overlayed on the image and stored as `sensorimotorkit/data/<date>/<trial_id>/<modality>/body_<left/right>/processed/<tracked_image>.png`

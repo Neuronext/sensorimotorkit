@@ -8,6 +8,8 @@ class MetadataConstants:
     POLLING_INTERVAL = 100 # ms
     SLEEP_TIME_BETWEEN_TRIALS = 1 # s
 
+    METADATA_FILE_NAME = 'metadata.csv'
+
     ENABLE_BODY_CAM = True
     ENABLE_DART_CAM = True
     ENABLE_EEG = False
@@ -53,6 +55,9 @@ class Paths:
 
 # Other constants
 class Constants:
+
+    # GUI
+    TRAFFIC_LIGHT_SIZE = 20 # pixels
 
     # Camera
     ACQUIRE_TIME = 10 # in seconds

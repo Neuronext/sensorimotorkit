@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout
 from PyQt5.QtGui import QPixmap
-from common.constants import MetadataConstants
+from common.constants import Constants
 from PyQt5.QtCore import pyqtSignal
 
 
@@ -12,8 +12,8 @@ class TrafficLight(QWidget):
         super().__init__()
         self.layout = QVBoxLayout()
         self.label = QLabel(self)
-        self.label.setMinimumSize(MetadataConstants.TRAFFIC_LIGHT_SIZE, MetadataConstants.TRAFFIC_LIGHT_SIZE)
-        self.label.setMaximumSize(MetadataConstants.TRAFFIC_LIGHT_SIZE, MetadataConstants.TRAFFIC_LIGHT_SIZE)
+        self.label.setMinimumSize(Constants.TRAFFIC_LIGHT_SIZE, Constants.TRAFFIC_LIGHT_SIZE)
+        self.label.setMaximumSize(Constants.TRAFFIC_LIGHT_SIZE, Constants.TRAFFIC_LIGHT_SIZE)
         self.layout.addWidget(self.label)
         self.setLayout(self.layout)
 
