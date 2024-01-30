@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^4.16.0",
+    "human": "^0.1.5"
+  }
+}
