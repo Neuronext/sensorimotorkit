@@ -1,10 +1,25 @@
 ### todo
-- flowchart needs to be updated with the documentation 
-- add a dropdown for target selection in the GUI 
+[updated 02/16]
+- eye tracking using body cam
+- make the body cam images colored and not grayscale
+- eeg signals are not getting collected
+- gui does not responding, hence not exactly sure when the data collection starts and ends
+- also i think the data collection is happening for a shorter duration than expected
+- add target selection to the GUI
+    - read images from the folder and display them in the dropdown
+- two computer setup is working for emg and eyetracking, so the gui should reflect the start and end of the trial for those
+- can we play a sound for start and end of trial
 - output should be formatted in standardized format example compatible with eeglab
-- gui not responding when collecting data
-- product links need to be added to the documentation
 - retest components of the kit
+
+### software issues jack is facing
+- fft for the eeg data - 16 channel csvs
+  - this is required for finding bandpower for corresponding brain waves
+  - to find dominant frequency
+- csv for gloves is not formatted properly, it has a lot of extra commas
+  - the csv file contains the xyz coord of the fingers, required for aligning with the finger images
+- finding the dart in the image
+
 
 ### <ask_jack> for the following
 - eeg + emg issues

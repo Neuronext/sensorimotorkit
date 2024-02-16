@@ -1,20 +1,20 @@
 # constant.py
 class MetadataConstants:
 
-    TRIALS_PER_BATCH = 3
-    BATCHES_PER_EXPERIMENT = 10
+    TRIALS_PER_BATCH = 1
+    BATCHES_PER_EXPERIMENT = 1
     TRAFFIC_LIGHT_SIZE = 20
     METADATA_FILE_NAME = 'metadata.csv'
     POLLING_INTERVAL = 100 # ms
-    SLEEP_TIME_BETWEEN_TRIALS = 1 # s
+    SLEEP_TIME_BETWEEN_TRIALS = 3 # s
 
     METADATA_FILE_NAME = 'metadata.csv'
 
     ENABLE_BODY_CAM = True
     ENABLE_DART_CAM = True
-    ENABLE_EEG = False
-    ENABLE_EMG = False
-    ENABLE_GLOVES = False
+    ENABLE_EEG = True
+    ENABLE_EMG = True
+    ENABLE_GLOVES = True
     ENABLE_EYES = True
 
     CAMERA = "spinview" # "spinview" or "opencv"
@@ -60,7 +60,7 @@ class Constants:
     TRAFFIC_LIGHT_SIZE = 20 # pixels
 
     # Camera
-    ACQUIRE_TIME = 10 # in seconds
+    ACQUIRE_TIME = 3 # in seconds
     FRAME_RATE_BODY_CAM = 120 # Hz
     FRAME_RATE_DART_CAM = 30 # Hz
     RESOLUTION_BODY_CAM = (600, 960) # (height, width) in pixels
@@ -69,7 +69,7 @@ class Constants:
     # EEG
     if MetadataConstants.ENABLE_EEG == True:
         EEG_BOARD_ID = 2 
-        EEG_SERIAL_PORT = 'COM3'
+        EEG_SERIAL_PORT = 'COM6'
         EEG_FILE_NAME = Paths.EEG_PATH + '/eeg.csv'
     
     # EMG
