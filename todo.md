@@ -1,4 +1,10 @@
 ### todo
+- gui not responding when collecting data
+- acquire time in gui
+- code for the skeleton plot for the body camera
+- eeg visualization:
+    - voltage plot for all the egg channels
+    - mean, min, max across all the channels - show which channel as well
 - add a dropdown for target selection in the GUI 
 - fix the drift in mediapipe
     - check if it is coming from the training data 
@@ -6,7 +12,6 @@
 - check for emotional decoding module from meta, check if it has facial detection module
 - check if finegrained hand data can be obtained, especially to track a person exploring an aobject in their hand
 - check for output compatibility with eeglab, erplab, fieldtrip, update documentation and readme accordingly 
-- gui not responding when collecting data
 - retest components of the kit
 - flowchart needs to be updated with the documentation <need_help_jack>
 - product links need to be added to the documentation <need_help_jack>
