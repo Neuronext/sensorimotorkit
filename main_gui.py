@@ -42,25 +42,6 @@ class ProcessThread(QThread):
             process_function(self.trial_path)
             self.update_traffic_light.emit(self.component, False)
 
-
-class ImageLabel(QLabel):
-    def __init__(self, parent=None):
-        super(ImageLabel, self).__init__(parent)
-        self.pixmap = None
-
-    def setPixmap(self, pixmap):
-        self.pixmap = pixmap
-        self.updatePixmap()
-
-    def resizeEvent(self, event):
-        self.updatePixmap()
-
-    def updatePixmap(self):
-        if self.pixmap:
-            scaledPixmap = self.pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            super(ImageLabel, self).setPixmap(scaledPixmap)
-
-
 class MainGUI(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -118,13 +99,6 @@ class MainGUI(QMainWindow):
         layout.addWidget(self.trialCountLabel)
         layout.addLayout(buttonsLayout)
         layout.addWidget(self.folderDialog)
-
-        # self.selectFilesBtn = QPushButton('Select Target Files', self)
-        # self.selectFilesBtn.clicked.connect(self.select_target_files)
-        # layout.addWidget(self.selectFilesBtn)
-
-        # self.targetFilesList = QListWidget(self)
-        # layout.addWidget(self.targetFilesList)
 
         self.targetSelectionComboBox = QComboBox(self)
         self.targetSelectionComboBox.addItem("Select Target Folder", None)
@@ -279,23 +253,11 @@ class MainGUI(QMainWindow):
                 self.targetSelectionComboBox.addItem(filename, os.path.join(targets_folder_path, filename))
 
     #TODO: need to add functionality for displaying it on the projector
-    # def display_selected_image(self):
-    #     selected_image_path = self.targetSelectionComboBox.currentData()
-    #     if selected_image_path:
-    #         pixmap = QPixmap(selected_image_path)
-    #         # self.imageDisplayLabel.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
-    #         self.imageDisplayLabel.setPixmap(pixmap.scaled(self.imageDisplayLabel.width(), self.imageDisplayLabel.height(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
-
-    #     else:
-    #         self.imageDisplayLabel.clear()
-
     def display_selected_image(self):
         selected_image_path = self.targetSelectionComboBox.currentData()
         if selected_image_path:
             pixmap = QPixmap(selected_image_path)
             self.imageDisplayLabel.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
-
-            # self.imageDisplayLabel.setPixmap(pixmap)
         else:
             self.imageDisplayLabel.clear() 
       
