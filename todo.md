@@ -1,5 +1,10 @@
-### todo
+### todo priority
 - gui not responding when collecting data
+- target display 
+- code for tracking
+
+
+### others
 - acquire time in gui
 - code for the skeleton plot for the body camera
 - eeg visualization:

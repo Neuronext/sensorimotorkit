@@ -7,7 +7,7 @@ import time
 
 # import PyQt5 modules
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
 
 
@@ -24,6 +24,21 @@ from process import start_bodycam_left, start_bodycam_right, start_dartcam, star
 def load_stylesheet(file_path):
     with open(file_path, "r") as file:
         return file.read()
+
+class ProcessThread(QThread):
+    update_traffic_light = pyqtSignal(str, bool)
+
+    def __init__(self, component, trial_path, enabled):
+        super(ProcessThread, self).__init__()
+        self.component = component
+        self.trial_path = trial_path
+        self.enabled = enabled
+
+    def run(self):
+        if self.enabled:
+            process_function = globals()[f"start_{self.component}"]
+            process_function(self.trial_path)
+            self.update_traffic_light.emit(self.component, False)
 
 
 class MainGUI(QMainWindow):
@@ -174,30 +189,28 @@ class MainGUI(QMainWindow):
     def pause_batch(self):
         # To pause the batch, suspend all running processes
         for _, process in self.processes.items():
-            process.suspend()
+            process.suspend()    
 
     def run_trial(self):
-        # Run the main trial process
-        
         data_path = os.path.normpath(self.folderDialog.get_selected_folder())
         print(f"data_path : {data_path}")
         self.trial_path = common_utils.TrialManager.setup_trial(gui=True, data_path=data_path)
 
-
         for component, enabled in Components.ENABLED_COMPONENTS.items():
             if enabled:
-                process_function = globals()[f"start_{component}"] 
-                self.processes[component] = multiprocessing.Process(target=process_function, args=(self.trial_path,))
-                
-        for key, process in self.processes.items():
-            process.start()
-            self.update_traffic_lights(key, True)  # Set traffic light to green
+                thread = ProcessThread(component, self.trial_path, enabled)
+                thread.update_traffic_light.connect(self.update_traffic_lights)
+                self.processes[component] = thread
 
-        #TODO Adding this makes the GUI becomes unresponsive when the processes are running
-        for key, process in self.processes.items():
-            process.join()
-            print(key, "joined")
-            self.update_traffic_lights(key, False)  # Set traffic light to red        
+        for key, thread in self.processes.items():
+            thread.start()
+            self.update_traffic_lights(key, True)
+        
+        # #TODO Adding this makes the GUI becomes unresponsive when the processes are running
+        # for key, process in self.processes.items():
+        #     process.join()
+        #     print(key, "joined")
+        #     self.update_traffic_lights(key, False)  # Set traffic light to red    
 
     def update_traffic_lights(self, process_name, is_running):
         if is_running:
