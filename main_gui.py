@@ -220,6 +220,7 @@ class MainGUI(QMainWindow):
             self.update_traffic_lights(key, True)
         
         # #TODO Adding this makes the GUI becomes unresponsive when the processes are running
+        # TODO: need to fix this, since there might be too many zombie processes
         # for key, process in self.processes.items():
         #     process.join()
         #     print(key, "joined")
