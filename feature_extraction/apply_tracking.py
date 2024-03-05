@@ -1,4 +1,4 @@
-
+import csv
 import os
 import cv2
 from common.constants import Paths
@@ -65,16 +65,16 @@ def apply_histograms(trial_path, raw_path, processed_path, output_name, frame_ra
 
 def create_video_from_images(trial_path, image_path, output_name, frame_rate=30):
     img_dir = os.path.normpath(os.path.join(trial_path, image_path))
-    image_files = sorted(os.listdir(img_dir), key=sort_key_func)
+    image_files = sorted([f for f in os.listdir(img_dir) if f.endswith('.png')], key=sort_key_func)
 
     if not image_files:
-        print(f"No images found in {img_dir}. Exiting function.")
+        print(f"No images PNG found in {img_dir}. Exiting function.")
         return
 
     first_image_path = os.path.join(img_dir, image_files[0])
     first_image = cv2.imread(first_image_path)
     if first_image is None:
-        print(f"Failed to read the first image from {first_image_path}. Exiting function.")
+        print(f"Failed to read the first PNG image from {first_image_path}. Exiting function.")
         return
     height, width = first_image.shape[:2]
 
@@ -112,6 +112,17 @@ def apply_pose_tracking_on_image(image_path, tracked_image_path=None):
             cv2.imshow('Tracked Pose', image)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
+        
+        return results.pose_landmarks if results.pose_landmarks else None
+
+def save_landmarks_to_csv(landmarks, csv_path):
+    with open(csv_path, mode='w', newline='') as file:
+        csv_writer = csv.writer(file)
+        header = ['landmark', 'x', 'y', 'z', 'visibility']
+        csv_writer.writerow(header)
+        
+        for i, landmark in enumerate(landmarks.landmark):
+            csv_writer.writerow([i, landmark.x, landmark.y, landmark.z, landmark.visibility])
 
 def process_images(trial_path, raw_path, processed_path):
     raw_dir = os.path.normpath(os.path.join(trial_path, raw_path))
@@ -120,7 +131,12 @@ def process_images(trial_path, raw_path, processed_path):
     for file_name in os.listdir(raw_dir):
         image_path = os.path.join(raw_dir, file_name)
         processed_image_path = os.path.join(processed_dir, f"processed_{file_name}")
-        apply_pose_tracking_on_image(image_path, processed_image_path)
+        # apply_pose_tracking_on_image(image_path, processed_image_path)
+        landmarks = apply_pose_tracking_on_image(image_path, processed_image_path)
+        
+        if landmarks:
+            csv_path = os.path.join(processed_dir, f"landmarks_{file_name}.csv")
+            save_landmarks_to_csv(landmarks, csv_path)
 
 def process_body_cam_images(trial_path):
     print("Applying pose tracking on body cam images")
