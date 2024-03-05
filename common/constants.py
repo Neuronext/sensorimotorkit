@@ -69,7 +69,7 @@ class Constants:
     # EEG
     if MetadataConstants.ENABLE_EEG == True:
         EEG_BOARD_ID = 2 
-        EEG_SERIAL_PORT = 'COM6'
+        EEG_SERIAL_PORT = 'COM3'
         EEG_FILE_NAME = Paths.EEG_PATH + '/eeg.csv'
     
     # EMG
