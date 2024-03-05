@@ -144,6 +144,7 @@ class MainGUI(QMainWindow):
                 self.age_edit.text(),
                 self.gender_edit.text(),
                 os.path.normpath(self.folderDialog.get_selected_folder()),
+                # self.trial_path,
                 self.comments_edit.text()
             ])
     
@@ -180,13 +181,13 @@ class MainGUI(QMainWindow):
         
         data_path = os.path.normpath(self.folderDialog.get_selected_folder())
         print(f"data_path : {data_path}")
-        trial_path = common_utils.TrialManager.setup_trial(gui=True, data_path=data_path)
+        self.trial_path = common_utils.TrialManager.setup_trial(gui=True, data_path=data_path)
 
 
         for component, enabled in Components.ENABLED_COMPONENTS.items():
             if enabled:
                 process_function = globals()[f"start_{component}"] 
-                self.processes[component] = multiprocessing.Process(target=process_function, args=(trial_path,))
+                self.processes[component] = multiprocessing.Process(target=process_function, args=(self.trial_path,))
                 
         for key, process in self.processes.items():
             process.start()
