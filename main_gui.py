@@ -6,9 +6,11 @@ import csv
 import time
 
 # import PyQt5 modules
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout, QFileDialog, QListWidget
 from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtGui import QPixmap
 
 
 # import custom modules
@@ -39,6 +41,24 @@ class ProcessThread(QThread):
             process_function = globals()[f"start_{self.component}"]
             process_function(self.trial_path)
             self.update_traffic_light.emit(self.component, False)
+
+
+class ImageLabel(QLabel):
+    def __init__(self, parent=None):
+        super(ImageLabel, self).__init__(parent)
+        self.pixmap = None
+
+    def setPixmap(self, pixmap):
+        self.pixmap = pixmap
+        self.updatePixmap()
+
+    def resizeEvent(self, event):
+        self.updatePixmap()
+
+    def updatePixmap(self):
+        if self.pixmap:
+            scaledPixmap = self.pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            super(ImageLabel, self).setPixmap(scaledPixmap)
 
 
 class MainGUI(QMainWindow):
@@ -99,6 +119,22 @@ class MainGUI(QMainWindow):
         layout.addLayout(buttonsLayout)
         layout.addWidget(self.folderDialog)
 
+        # self.selectFilesBtn = QPushButton('Select Target Files', self)
+        # self.selectFilesBtn.clicked.connect(self.select_target_files)
+        # layout.addWidget(self.selectFilesBtn)
+
+        # self.targetFilesList = QListWidget(self)
+        # layout.addWidget(self.targetFilesList)
+
+        self.targetSelectionComboBox = QComboBox(self)
+        self.targetSelectionComboBox.addItem("Select Target Folder", None)
+        self.load_targets_into_combobox()
+        self.targetSelectionComboBox.currentIndexChanged.connect(self.display_selected_image)
+        layout.addWidget(self.targetSelectionComboBox)
+
+        self.imageDisplayLabel = QLabel(self)
+        layout.addWidget(self.imageDisplayLabel)
+
         self.update_metadata_constants(layout)
         layout.addLayout(self.traffic_light_layout)
         self.add_metadata_fields(layout)
@@ -106,7 +142,7 @@ class MainGUI(QMainWindow):
         # Set main widget
         centralWidget = QWidget()
         centralWidget.setLayout(layout)
-        centralWidget.setMinimumSize(600, 400)
+        centralWidget.setMinimumSize(800, 600)
         self.setCentralWidget(centralWidget)
 
     def update_metadata_constants(self, layout):
@@ -149,9 +185,11 @@ class MainGUI(QMainWindow):
             
             # if file doesn't exist, write headers
             if not file_exists:
-                writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Trial Folder' 'Comments'])
+                writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Trial Folder', 'Target', 'Comments'])
             
-            # Write data
+            # Write 
+            selected_target_path = self.targetSelectionComboBox.currentData()
+            selected_target = os.path.basename(selected_target_path) if selected_target_path else "None"
             writer.writerow([
                 self.date_edit.text(),
                 self.participant_id_edit.text(),
@@ -160,6 +198,7 @@ class MainGUI(QMainWindow):
                 self.gender_edit.text(),
                 os.path.normpath(self.folderDialog.get_selected_folder()),
                 # self.trial_path,
+                selected_target,
                 self.comments_edit.text()
             ])
     
@@ -222,6 +261,43 @@ class MainGUI(QMainWindow):
             self.trafficLights[process_name].updateColor.emit('red')
             self.trafficLights[process_name].status = 'red'
         QApplication.processEvents()
+
+    def select_target_files(self):
+        folder_path = str(QFileDialog.getExistingDirectory(self, "Select Folder"))
+        if folder_path:
+            file_filter = 'Image files (*.png *.jpg *.jpeg *.bmp *.gif)'
+            file_paths, _ = QFileDialog.getOpenFileNames(self, "Select Target Files", folder_path, file_filter)
+            self.targetFilesList.clear() 
+            self.targetFilesList.addItems(file_paths)  
+
+    def load_targets_into_combobox(self):
+        self.targetSelectionComboBox.clear()
+        self.targetSelectionComboBox.addItem("Select Target Folder", None)
+        targets_folder_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'assets', 'targets')
+        for filename in os.listdir(targets_folder_path):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                self.targetSelectionComboBox.addItem(filename, os.path.join(targets_folder_path, filename))
+
+    #TODO: need to add functionality for displaying it on the projector
+    # def display_selected_image(self):
+    #     selected_image_path = self.targetSelectionComboBox.currentData()
+    #     if selected_image_path:
+    #         pixmap = QPixmap(selected_image_path)
+    #         # self.imageDisplayLabel.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
+    #         self.imageDisplayLabel.setPixmap(pixmap.scaled(self.imageDisplayLabel.width(), self.imageDisplayLabel.height(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+    #     else:
+    #         self.imageDisplayLabel.clear()
+
+    def display_selected_image(self):
+        selected_image_path = self.targetSelectionComboBox.currentData()
+        if selected_image_path:
+            pixmap = QPixmap(selected_image_path)
+            self.imageDisplayLabel.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
+
+            # self.imageDisplayLabel.setPixmap(pixmap)
+        else:
+            self.imageDisplayLabel.clear() 
       
 
 if __name__ == '__main__':

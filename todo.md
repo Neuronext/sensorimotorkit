@@ -1,5 +1,6 @@
 ### todo priority
 - gui not responding when collecting data
+- gui stop does not work
 - target display 
 - code for tracking
 
