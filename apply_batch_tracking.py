@@ -7,7 +7,7 @@ def process_trial(date, trial_num, draw_skeleton=False):
     main(trial_path, draw_skeleton=draw_skeleton)
 
 if __name__ == "__main__":
-    date = "2024-02-15"
-    trial_num = "5"
+    date = "2024-02-28"
+    trial_num = "6"
     draw_skeleton = False
     process_trial(date, trial_num, draw_skeleton=draw_skeleton)
