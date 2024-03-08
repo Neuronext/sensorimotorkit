@@ -4,6 +4,7 @@ import os
 import datetime
 import csv
 import time
+import numpy as np
 
 # import PyQt5 modules
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout, QFileDialog, QListWidget
@@ -11,6 +12,9 @@ from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QGraphicsLineItem
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPen
 
 
 # import custom modules
@@ -21,11 +25,37 @@ from gui.custom_title_bar import CustomTitleBar
 from common.constants import Constants, MetadataConstants, Components
 from common import common_utils
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
-
+from acquire_data.eeg.eeg import EEGWorkerThread #TODO: bad import, should add come from process
+from common.board_utils import initialize_board
 
 def load_stylesheet(file_path):
     with open(file_path, "r") as file:
         return file.read()
+    
+
+class EEGPlotWidget(QGraphicsView):
+    def __init__(self, parent=None):
+        super(EEGPlotWidget, self).__init__(parent)
+        self.scene = QGraphicsScene(self)
+        self.setScene(self.scene)
+        self.lines = []
+
+    def plot_eeg_data(self, data):
+        self.scene.clear()  # Clear previous plot
+        pen = QPen(Qt.red, 2)
+        max_y = max(max(row) for row in data) if data else 1
+        min_y = min(min(row) for row in data) if data else -1
+        height = self.size().height()
+        width = self.size().width()
+        
+        for channel_index, channel_data in enumerate(data):
+            for i in range(len(channel_data) - 1):
+                x1 = (i / len(channel_data)) * width
+                y1 = ((channel_data[i] - min_y) / (max_y - min_y)) * height
+                x2 = ((i + 1) / len(channel_data)) * width
+                y2 = ((channel_data[i + 1] - min_y) / (max_y - min_y)) * height
+                self.scene.addLine(x1, height - y1, x2, height - y2, pen)
+
 
 class ProcessThread(QThread):
     update_traffic_light = pyqtSignal(str, bool)
@@ -109,6 +139,15 @@ class MainGUI(QMainWindow):
         self.imageDisplayLabel = QLabel(self)
         layout.addWidget(self.imageDisplayLabel)
 
+        self.eegPlotWidget = EEGPlotWidget(self)
+        layout.addWidget(self.eegPlotWidget)
+
+        self.board = self.initialize_eeg_board()
+        self.eegWorker = EEGWorkerThread(duration=Constants.ACQUIRE_TIME, board=self.board)
+        # self.eegWorker = EEGWorkerThread(duration=Constants.ACQUIRE_TIME, board_params=(Constants.EEG_SERIAL_PORT, Constants.EEG_BOARD_ID))
+        self.eegWorker.data_collected.connect(self.update_eeg_plot)
+        self.startBtn.clicked.connect(self.eegWorker.start)
+
         self.update_metadata_constants(layout)
         layout.addLayout(self.traffic_light_layout)
         self.add_metadata_fields(layout)
@@ -118,6 +157,20 @@ class MainGUI(QMainWindow):
         centralWidget.setLayout(layout)
         centralWidget.setMinimumSize(800, 600)
         self.setCentralWidget(centralWidget)
+
+
+    def initialize_eeg_board(self):
+        try:
+            board_params = (Constants.EEG_SERIAL_PORT, Constants.EEG_BOARD_ID)
+            board = initialize_board(*board_params)
+            return board
+        except Exception as e:
+            print(f"Failed to initialize EEG board: {e}")
+            return None
+
+
+    def update_eeg_plot(self, eeg_data):
+        self.eegPlotWidget.plot_eeg_data(eeg_data)
 
     def update_metadata_constants(self, layout):
         form_layout = QFormLayout()
@@ -214,6 +267,9 @@ class MainGUI(QMainWindow):
                 thread = ProcessThread(component, self.trial_path, enabled)
                 thread.update_traffic_light.connect(self.update_traffic_lights)
                 self.processes[component] = thread
+                if component == 'eeg':
+                    self.eegWorker.data_collected.connect(self.update_eeg_plot)
+                    self.eegWorker.start()
 
         for key, thread in self.processes.items():
             thread.start()

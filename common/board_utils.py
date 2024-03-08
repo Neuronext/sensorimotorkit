@@ -5,6 +5,7 @@ import brainflow
 from brainflow.board_shim import BoardShim, BrainFlowInputParams
 from brainflow.exit_codes import BrainFlowExitCodes
 from common.constants import Constants
+import inspect
 
 def handle_brainflow_error(e):
     if e.exit_code == BrainFlowExitCodes.BOARD_NOT_CREATED_ERROR:
@@ -15,6 +16,9 @@ def handle_brainflow_error(e):
         print(f"BrainFlowError encountered: {e}")
 
 def initialize_board(serial_port, board_id):
+    caller_name = inspect.stack()[1].function
+    print(f"Called by {caller_name}")
+    print(f"Initializing board with serial port {serial_port} and board ID {board_id}")
     try:
         params = BrainFlowInputParams()
         params.serial_port = serial_port
