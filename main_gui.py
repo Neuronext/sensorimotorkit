@@ -21,7 +21,7 @@ from gui.custom_title_bar import CustomTitleBar
 from common.constants import Constants, MetadataConstants, Components
 from common import common_utils
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
-
+from gui.projector import ImageDisplayApp
 
 def load_stylesheet(file_path):
     with open(file_path, "r") as file:
