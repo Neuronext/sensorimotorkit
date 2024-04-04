@@ -49,6 +49,8 @@ class MainGUI(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.folderSelected.connect(self.open_projector_gui)
+
         # Load and apply stylesheet
         stylesheet = load_stylesheet("gui/style.css")
         self.setStyleSheet(stylesheet)
@@ -267,6 +269,10 @@ class MainGUI(QMainWindow):
             self.imageDisplayLabel.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
         else:
             self.imageDisplayLabel.clear() 
+
+    def open_projector_gui(self, folder_path):
+        image_display_app = ImageDisplayApp(folder_path)
+        image_display_app.show()
       
 
 if __name__ == '__main__':
