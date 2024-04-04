@@ -22,7 +22,7 @@ class ImageDisplayApp(QWidget):
         # Slider for horizontal resizing
         self.horizontal_slider = QSlider(Qt.Horizontal)
         self.horizontal_slider.setMinimum(0)
-        self.horizontal_slider.setMaximum(200)
+        self.horizontal_slider.setMaximum(200)   
         self.horizontal_slider.setValue(100)
         self.horizontal_slider.valueChanged.connect(self.resize_image)
 
