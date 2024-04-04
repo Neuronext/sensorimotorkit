@@ -1,6 +1,6 @@
 import sys
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QColorDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QColorDialog
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import Qt, QSize
 
@@ -11,7 +11,7 @@ class ImageDisplayApp(QWidget):
         self.setWindowTitle("Dart Display App")
         self.setMinimumSize(400, 400)  # Set the minimum size of the widget
 
-        self.image_folder = "C:/Users/Data acquisition/sensorimotorkit/assets/targets"  # Store the folder path
+        self.image_folder = image_folder  # Store the folder path
 
         # Display initial image
         self.image_label = QLabel(self)
@@ -38,11 +38,18 @@ class ImageDisplayApp(QWidget):
         # Initial scale factor
         self.scale_factor = 1.0
 
-    def display_selected_image(self, image_path):
+    def display_selected_image(self):
         # Load and display the selected image
-        if image_path:
-            pixmap = QPixmap(image_path)
-            self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        if os.path.exists(self.image_folder):
+            files = [file for file in os.listdir(self.image_folder) if file.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))]
+            if files:
+                image_path = os.path.join(self.image_folder, files[0])
+                pixmap = QPixmap(image_path)
+                self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            else:
+                self.image_label.setText("No images found in folder.")
+        else:
+            self.image_label.setText("Invalid folder path.")
 
     def change_background_color(self):
         color = QColorDialog.getColor()
@@ -73,6 +80,13 @@ class ImageDisplayController:
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    image_display_app = ImageDisplayApp()
+    image_display_app = ImageDisplayApp("")  # Provide an initial empty string
     image_display_app.show()
+
+    # Create an instance of ImageDisplayController
+    image_display_controller = ImageDisplayController(image_display_app)
+
+    # Connect the folderSelected signal from MainGUI to update_displayed_image slot in ImageDisplayController
+    mainWin.folderSelected.connect(image_display_controller.update_displayed_image)
+
     sys.exit(app.exec_())

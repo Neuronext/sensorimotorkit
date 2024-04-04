@@ -274,8 +274,8 @@ if __name__ == '__main__':
     mainWin = MainGUI()
     mainWin.show()
 
-    #image_display_app = ImageDisplayApp()
-    #mainWin.imageSelected.connect(image_display_app.display_selected_image)
-    #image_display_app.show()
+    image_display_app = ImageDisplayApp("")
+    image_display_controller = ImageDisplayController(image_display_app)
+    mainWin.folderSelected.connect(image_display_controller.update_displayed_image)
 
     sys.exit(app.exec_())
