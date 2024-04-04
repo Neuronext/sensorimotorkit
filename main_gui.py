@@ -249,7 +249,7 @@ class MainGUI(QMainWindow):
             self.targetFilesList.addItems(file_paths)  
 
             # signal for folder path to projector.py
-            self.folderSelected.emit(folder_path)
+            # self.folderSelected.emit(folder_path)
 
     def load_targets_into_combobox(self):
         self.targetSelectionComboBox.clear()
@@ -274,8 +274,8 @@ if __name__ == '__main__':
     mainWin = MainGUI()
     mainWin.show()
 
-    image_display_app = ImageDisplayApp()
-    mainWin.imageSelected.connect(image_display_app.display_selected_image)
-    image_display_app.show()
+    #image_display_app = ImageDisplayApp()
+    #mainWin.imageSelected.connect(image_display_app.display_selected_image)
+    #image_display_app.show()
 
     sys.exit(app.exec_())

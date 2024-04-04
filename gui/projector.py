@@ -11,7 +11,7 @@ class ImageDisplayApp(QWidget):
         self.setWindowTitle("Dart Display App")
         self.setMinimumSize(400, 400)  # Set the minimum size of the widget
 
-        self.image_folder = image_folder  # Store the folder path
+        self.image_folder = "C:/Users/Data acquisition/sensorimotorkit/assets/targets"  # Store the folder path
 
         # Display initial image
         self.image_label = QLabel(self)
