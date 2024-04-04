@@ -7,7 +7,7 @@ import time
 
 # import PyQt5 modules
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout, QFileDialog, QListWidget
-from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtGui import QPixmap
@@ -43,6 +43,9 @@ class ProcessThread(QThread):
             self.update_traffic_light.emit(self.component, False)
 
 class MainGUI(QMainWindow):
+    # keeps track of the folder selected by user
+    folderSelected = pyqtSignal(str)
+
     def __init__(self):
         super().__init__()
 
@@ -245,6 +248,9 @@ class MainGUI(QMainWindow):
             self.targetFilesList.clear() 
             self.targetFilesList.addItems(file_paths)  
 
+            # signal for folder path to projector.py
+            self.folderSelected.emit(folder_path)
+
     def load_targets_into_combobox(self):
         self.targetSelectionComboBox.clear()
         self.targetSelectionComboBox.addItem("Select Target Folder", None)
@@ -267,4 +273,12 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWin = MainGUI()
     mainWin.show()
+
+    image_folder = "C:/Users/Dataacquisition/sensorimotorkit/assets/targets/"  # Example folder path, modify as needed
+    image_display_app = ImageDisplayApp(image_folder)
+    image_display_controller = ImageDisplayController(image_display_app)
+    mainWin.folderSelected.connect(image_display_controller.update_displayed_image)
+    
+    image_display_app.show()
+
     sys.exit(app.exec_())
