@@ -38,10 +38,9 @@ class ImageDisplayApp(QWidget):
         # Initial scale factor
         self.scale_factor = 1.0
 
-    def display_selected_image(self):
-        # Load and display the image from the selected folder
-        if self.image_folder:
-            image_path = os.path.join(self.image_folder, 'example.jpg')  # Example image path, modify as needed
+    def display_selected_image(self, image_path):
+        # Load and display the selected image
+        if image_path:
             pixmap = QPixmap(image_path)
             self.image_label.setPixmap(pixmap.scaled(self.image_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
@@ -74,7 +73,6 @@ class ImageDisplayController:
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    image_folder = "C:/Users/Dataacquisition/sensorimotorkit/assets/targets/"  # Example folder path, modify as needed
-    image_display_app = ImageDisplayApp(image_folder)
+    image_display_app = ImageDisplayApp()
     image_display_app.show()
     sys.exit(app.exec_())

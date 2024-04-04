@@ -21,7 +21,7 @@ from gui.custom_title_bar import CustomTitleBar
 from common.constants import Constants, MetadataConstants, Components
 from common import common_utils
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
-from gui.projector import ImageDisplayApp
+from gui.projector import ImageDisplayApp, ImageDisplayController
 
 def load_stylesheet(file_path):
     with open(file_path, "r") as file:
@@ -274,11 +274,8 @@ if __name__ == '__main__':
     mainWin = MainGUI()
     mainWin.show()
 
-    image_folder = "C:/Users/Dataacquisition/sensorimotorkit/assets/targets/"  # Example folder path, modify as needed
-    image_display_app = ImageDisplayApp(image_folder)
-    image_display_controller = ImageDisplayController(image_display_app)
-    mainWin.folderSelected.connect(image_display_controller.update_displayed_image)
-    
+    image_display_app = ImageDisplayApp()
+    mainWin.imageSelected.connect(image_display_app.display_selected_image)
     image_display_app.show()
 
     sys.exit(app.exec_())
