@@ -21,7 +21,7 @@ from gui.custom_title_bar import CustomTitleBar
 from common.constants import Constants, MetadataConstants, Components
 from common import common_utils
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
-from gui.projector import ImageDisplayApp, ImageDisplayController
+from gui.projector import ImageDisplayApp
 
 def load_stylesheet(file_path):
     with open(file_path, "r") as file:
@@ -43,13 +43,9 @@ class ProcessThread(QThread):
             self.update_traffic_light.emit(self.component, False)
 
 class MainGUI(QMainWindow):
-    # keeps track of the folder selected by user
-    folderSelected = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
-
-        self.folderSelected.connect(self.open_projector_gui)
 
         # Load and apply stylesheet
         stylesheet = load_stylesheet("gui/style.css")
@@ -123,6 +119,8 @@ class MainGUI(QMainWindow):
         centralWidget.setLayout(layout)
         centralWidget.setMinimumSize(800, 600)
         self.setCentralWidget(centralWidget)
+
+        self.imageDisplayApp = ImageDisplayApp("")
 
     def update_metadata_constants(self, layout):
         form_layout = QFormLayout()
@@ -250,9 +248,6 @@ class MainGUI(QMainWindow):
             self.targetFilesList.clear() 
             self.targetFilesList.addItems(file_paths)  
 
-            # signal for folder path to projector.py
-            # self.folderSelected.emit(folder_path)
-
     def load_targets_into_combobox(self):
         self.targetSelectionComboBox.clear()
         self.targetSelectionComboBox.addItem("Select Target Folder", None)
@@ -267,21 +262,16 @@ class MainGUI(QMainWindow):
         if selected_image_path:
             pixmap = QPixmap(selected_image_path)
             self.imageDisplayLabel.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
+            self.imageDisplayApp.set_image(selected_image_path)  # Update image in existing instance
+            self.imageDisplayApp.show()
+            print("app shown")
         else:
-            self.imageDisplayLabel.clear() 
-
-    def open_projector_gui(self, folder_path):
-        image_display_app = ImageDisplayApp(folder_path)
-        image_display_app.show()
-      
+            self.imageDisplayLabel.clear()
+            self.imageDisplayApp.hide() 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWin = MainGUI()
     mainWin.show()
-
-    image_display_app = ImageDisplayApp("")
-    image_display_controller = ImageDisplayController(image_display_app)
-    mainWin.folderSelected.connect(image_display_controller.update_displayed_image)
 
     sys.exit(app.exec_())
