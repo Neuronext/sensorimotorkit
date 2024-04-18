@@ -1,8 +1,8 @@
 import sys
 import os
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QColorDialog, QFileDialog, QComboBox
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QColorDialog, QFileDialog
 from PyQt5.QtGui import QPixmap, QColor
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPoint, QFile, QTextStream
 
 class ImageDisplayApp(QWidget):
     def __init__(self, image_path):
@@ -25,43 +25,99 @@ class ImageDisplayApp(QWidget):
         zoom_out_button = QPushButton("Zoom Out", self)
         zoom_out_button.clicked.connect(self.zoom_out)
 
+        save_button = QPushButton("Save", self)
+        save_button.clicked.connect(self.save_settings)
+
         layout = QVBoxLayout()
         layout.addWidget(self.image_label)
         layout.addWidget(color_button)
         layout.addWidget(zoom_in_button)
         layout.addWidget(zoom_out_button)
+        layout.addWidget(save_button)
         self.setLayout(layout)
 
         self.scale_factor = 1.0
+        self.offset = QPoint(0, 0)
+        self.dragging = False
 
-    def set_image(self, image_path):
-        pixmap = QPixmap(image_path)
-        self.image_label.setPixmap(pixmap)
+        self.load_settings()
 
     def display_selected_image(self):
         pixmap = QPixmap(self.image_path)
         self.image_label.setPixmap(pixmap)
+        self.image_label.setFixedSize(pixmap.size())
 
     def change_background_color(self):
         color = QColorDialog.getColor()
         if color.isValid():
-            self.setAutoFillBackground(True)
             palette = self.palette()
             palette.setColor(self.backgroundRole(), color)
             self.setPalette(palette)
 
     def zoom_in(self):
         self.scale_factor *= 1.25
-        self.image_label.resize(self.image_label.pixmap().size() * self.scale_factor)
+        scaled_pixmap = self.image_label.pixmap().scaled(
+            self.image_label.pixmap().size() * self.scale_factor,
+            aspectRatioMode=Qt.KeepAspectRatio
+        )
+        self.image_label.setPixmap(scaled_pixmap)
 
     def zoom_out(self):
         self.scale_factor *= 0.8
-        self.image_label.resize(self.image_label.pixmap().size() * self.scale_factor)
+        scaled_pixmap = self.image_label.pixmap().scaled(
+            self.image_label.pixmap().size() * self.scale_factor,
+            aspectRatioMode=Qt.KeepAspectRatio
+        )
+        self.image_label.setPixmap(scaled_pixmap)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton and self.image_label.geometry().contains(event.pos()):
+            self.dragging = True
+            self.offset = event.pos()
+
+    def mouseMoveEvent(self, event):
+        if self.dragging:
+            new_pos = self.mapToParent(event.pos() - self.offset)
+            self.image_label.move(new_pos)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.dragging = False
+
+    def save_settings(self):
+        settings_file = QFile("settings.txt")
+        if settings_file.open(QFile.WriteOnly | QFile.Text):
+            out = QTextStream(settings_file)
+            out << f"Background Color: {self.palette().color(self.backgroundRole()).name()}\n"
+            out << f"Image Position: {self.image_label.pos().x()}, {self.image_label.pos().y()}\n"
+            out << f"Zoom Level: {self.scale_factor}\n"
+            settings_file.close()
+
+    def load_settings(self):
+        settings_file = QFile("settings.txt")
+        if settings_file.open(QFile.ReadOnly | QFile.Text):
+            settings = QTextStream(settings_file).readAll().split("\n")
+            for setting in settings:
+                if setting.startswith("Background Color"):
+                    color = QColor(setting.split(":")[1].strip())
+                    palette = self.palette()
+                    palette.setColor(self.backgroundRole(), color)
+                    self.setPalette(palette)
+                elif setting.startswith("Image Position"):
+                    pos = setting.split(":")[1].strip().split(",")
+                    self.image_label.move(int(pos[0]), int(pos[1]))
+                elif setting.startswith("Zoom Level"):
+                    self.scale_factor = float(setting.split(":")[1].strip())
+                    scaled_pixmap = self.image_label.pixmap().scaled(
+                        self.image_label.pixmap().size() * self.scale_factor,
+                        aspectRatioMode=Qt.KeepAspectRatio
+                    )
+                    self.image_label.setPixmap(scaled_pixmap)
+            settings_file.close()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     image_path = sys.argv[1]
     imageDisplayApp = ImageDisplayApp(image_path)
     imageDisplayApp.show()
-    app.exec_()
-
+    sys.exit(app.exec_())
