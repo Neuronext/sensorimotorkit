@@ -120,7 +120,7 @@ class MainGUI(QMainWindow):
         centralWidget.setMinimumSize(800, 600)
         self.setCentralWidget(centralWidget)
 
-        self.imageDisplayApp = ImageDisplayApp("")
+        self.imageDisplayApp = ImageDisplayApp("","")
 
     def update_metadata_constants(self, layout):
         form_layout = QFormLayout()
@@ -262,9 +262,8 @@ class MainGUI(QMainWindow):
         if selected_image_path:
             pixmap = QPixmap(selected_image_path)
             self.imageDisplayLabel.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
-            self.imageDisplayApp.set_image(selected_image_path)  # Update image in existing instance
+            self.imageDisplayApp.display_selected_image(selected_image_path)  # Update image in existing instance
             self.imageDisplayApp.show()
-            print("app shown")
         else:
             self.imageDisplayLabel.clear()
             self.imageDisplayApp.hide() 

@@ -1,0 +1,3 @@
+Background Color: #f0f0f0
+Image Position: 379, 52
+Zoom Level: 0.6400000000000001

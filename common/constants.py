@@ -60,7 +60,7 @@ class Constants:
     TRAFFIC_LIGHT_SIZE = 20 # pixels
 
     # Camera
-    ACQUIRE_TIME = 10 # in seconds
+    ACQUIRE_TIME = 7 # in seconds
     FRAME_RATE_BODY_CAM = 120 # Hz
     FRAME_RATE_DART_CAM = 30 # Hz
     RESOLUTION_BODY_CAM = (600, 960) # (height, width) in pixels
