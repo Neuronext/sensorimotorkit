@@ -1,58 +1,53 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QColorDialog
-from PyQt5.QtGui import QPixmap, QColor
-from PyQt5.QtCore import Qt, QFile, QTextStream
+import os
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QColorDialog, QFileDialog
+from PyQt5.QtGui import QPixmap, QColor, QCursor
+from PyQt5.QtCore import Qt, QPoint, QFile, QTextStream
 
 class ImageDisplayApp(QWidget):
-    def __init__(self, image_path, data_point):
+    def __init__(self, image_path):
         super().__init__()
         
         self.setWindowTitle("Image Display App")
-        self.setMinimumSize(500, 500)
+        self.setMinimumSize(400, 400)
 
         self.image_path = image_path
 
         self.image_label = QLabel(self)
-        self.display_selected_image(image_path)
+        self.display_selected_image()
 
-        self.data_point_label = QLabel("", self)
+        color_button = QPushButton("Change Background Color", self)
+        color_button.clicked.connect(self.change_background_color)
 
-        self.color_button = QPushButton("Change Background Color", self)
-        self.color_button.clicked.connect(self.change_background_color)
+        zoom_in_button = QPushButton("Zoom In", self)
+        zoom_in_button.clicked.connect(self.zoom_in)
 
-        self.zoom_in_button = QPushButton("Zoom In", self)
-        self.zoom_in_button.clicked.connect(self.zoom_in)
+        zoom_out_button = QPushButton("Zoom Out", self)
+        zoom_out_button.clicked.connect(self.zoom_out)
 
-        self.zoom_out_button = QPushButton("Zoom Out", self)
-        self.zoom_out_button.clicked.connect(self.zoom_out)
+        save_button = QPushButton("Save", self)
+        save_button.clicked.connect(self.save_settings)
 
-        self.save_button = QPushButton("Save", self)
-        self.save_button.clicked.connect(self.save_settings)
-
-        # Vertical layout for buttons at the bottom
-        buttons_layout = QHBoxLayout()
-        buttons_layout.addWidget(self.color_button)
-        buttons_layout.addWidget(self.zoom_in_button)
-        buttons_layout.addWidget(self.zoom_out_button)
-        buttons_layout.addWidget(self.save_button)
-
-        # Vertical layout for the whole widget
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self.image_label)
-        main_layout.addWidget(self.data_point_label)
-        main_layout.addLayout(buttons_layout)
-
-        self.setLayout(main_layout)
+        layout = QVBoxLayout()
+        layout.addWidget(self.image_label)
+        layout.addWidget(color_button)
+        layout.addWidget(zoom_in_button)
+        layout.addWidget(zoom_out_button)
+        layout.addWidget(save_button)
+        self.setLayout(layout)
 
         self.scale_factor = 1.0
-        self.drag_start_pos = None
-        self.setMouseTracking(True)
-        self.image_label.raise_()
+        self.offset = QPoint(0, 0)
+        self.dragging = False
 
         self.load_settings()
 
-    def display_selected_image(self, image_path):
-        self.image_path = image_path
+    def set_image(self):
+        pixmap = QPixmap(image_path)
+        self.image_label.setPixmap(pixmap)
+        self.image_label.setFixedSize(pixmap.size())
+
+    def display_selected_image(self):
         pixmap = QPixmap(self.image_path)
         self.image_label.setPixmap(pixmap)
         self.image_label.setFixedSize(pixmap.size())
@@ -60,7 +55,6 @@ class ImageDisplayApp(QWidget):
     def change_background_color(self):
         color = QColorDialog.getColor()
         if color.isValid():
-            self.setAutoFillBackground(True)
             palette = self.palette()
             palette.setColor(self.backgroundRole(), color)
             self.setPalette(palette)
@@ -83,29 +77,17 @@ class ImageDisplayApp(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and self.image_label.geometry().contains(event.pos()):
-            self.drag_start_pos = event.pos()
+            self.dragging = True
+            self.offset = event.pos()
 
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.LeftButton and self.drag_start_pos:
-            delta = event.pos() - self.drag_start_pos
-            new_pos = self.image_label.pos() + delta
-
-            # Ensure the new position stays within the boundaries of the window
-            if new_pos.x() >= 0 and new_pos.y() >= 0 \
-                    and new_pos.x() + self.image_label.width() <= self.width() \
-                    and new_pos.y() + self.image_label.height() <= self.height():
-                self.image_label.move(new_pos)
-                self.drag_start_pos = event.pos()
-                self.update_data_point_label(self.image_label.pos())
-                self.raise_()
+        if self.dragging:
+            new_pos = self.mapToParent(event.pos() - self.offset)
+            self.image_label.move(new_pos)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.drag_start_pos = None
-
-    def update_data_point_label(self, pos):
-        data_point = f"Data Point: ({pos.x()}, {pos.y()})"
-        self.data_point_label.setText(data_point)
+            self.dragging = False
 
     def save_settings(self):
         settings_file = QFile("settings.txt")
@@ -137,6 +119,12 @@ class ImageDisplayApp(QWidget):
                     )
                     self.image_label.setPixmap(scaled_pixmap)
             settings_file.close()
+
+    def enterEvent(self, event):
+        self.setCursor(QCursor(Qt.OpenHandCursor))
+
+    def leaveEvent(self, event):
+        self.setCursor(QCursor(Qt.ArrowCursor))
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
