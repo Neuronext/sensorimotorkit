@@ -6,9 +6,11 @@ import csv
 import time
 
 # import PyQt5 modules
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout, QFileDialog, QListWidget
+from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, pyqtSignal
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtGui import QPixmap
 
 
 # import custom modules
@@ -19,14 +21,29 @@ from gui.custom_title_bar import CustomTitleBar
 from common.constants import Constants, MetadataConstants, Components
 from common import common_utils
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
-
+from gui.projector import ImageDisplayApp
 
 def load_stylesheet(file_path):
     with open(file_path, "r") as file:
         return file.read()
 
+class ProcessThread(QThread):
+    update_traffic_light = pyqtSignal(str, bool)
+
+    def __init__(self, component, trial_path, enabled):
+        super(ProcessThread, self).__init__()
+        self.component = component
+        self.trial_path = trial_path
+        self.enabled = enabled
+
+    def run(self):
+        if self.enabled:
+            process_function = globals()[f"start_{self.component}"]
+            process_function(self.trial_path)
+            self.update_traffic_light.emit(self.component, False)
 
 class MainGUI(QMainWindow):
+
     def __init__(self):
         super().__init__()
 
@@ -84,6 +101,15 @@ class MainGUI(QMainWindow):
         layout.addLayout(buttonsLayout)
         layout.addWidget(self.folderDialog)
 
+        self.targetSelectionComboBox = QComboBox(self)
+        self.targetSelectionComboBox.addItem("Select Target Folder", None)
+        self.load_targets_into_combobox()
+        self.targetSelectionComboBox.currentIndexChanged.connect(self.display_selected_image)
+        layout.addWidget(self.targetSelectionComboBox)
+
+        self.imageDisplayLabel = QLabel(self)
+        layout.addWidget(self.imageDisplayLabel)
+
         self.update_metadata_constants(layout)
         layout.addLayout(self.traffic_light_layout)
         self.add_metadata_fields(layout)
@@ -91,8 +117,10 @@ class MainGUI(QMainWindow):
         # Set main widget
         centralWidget = QWidget()
         centralWidget.setLayout(layout)
-        centralWidget.setMinimumSize(600, 400)
+        centralWidget.setMinimumSize(800, 600)
         self.setCentralWidget(centralWidget)
+
+        self.imageDisplayApp = ImageDisplayApp("","")
 
     def update_metadata_constants(self, layout):
         form_layout = QFormLayout()
@@ -134,9 +162,11 @@ class MainGUI(QMainWindow):
             
             # if file doesn't exist, write headers
             if not file_exists:
-                writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Trial Folder' 'Comments'])
+                writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Trial Folder', 'Target', 'Comments'])
             
-            # Write data
+            # Write 
+            selected_target_path = self.targetSelectionComboBox.currentData()
+            selected_target = os.path.basename(selected_target_path) if selected_target_path else "None"
             writer.writerow([
                 self.date_edit.text(),
                 self.participant_id_edit.text(),
@@ -145,6 +175,7 @@ class MainGUI(QMainWindow):
                 self.gender_edit.text(),
                 os.path.normpath(self.folderDialog.get_selected_folder()),
                 # self.trial_path,
+                selected_target,
                 self.comments_edit.text()
             ])
     
@@ -174,30 +205,29 @@ class MainGUI(QMainWindow):
     def pause_batch(self):
         # To pause the batch, suspend all running processes
         for _, process in self.processes.items():
-            process.suspend()
+            process.suspend()    
 
     def run_trial(self):
-        # Run the main trial process
-        
         data_path = os.path.normpath(self.folderDialog.get_selected_folder())
         print(f"data_path : {data_path}")
         self.trial_path = common_utils.TrialManager.setup_trial(gui=True, data_path=data_path)
 
-
         for component, enabled in Components.ENABLED_COMPONENTS.items():
             if enabled:
-                process_function = globals()[f"start_{component}"] 
-                self.processes[component] = multiprocessing.Process(target=process_function, args=(self.trial_path,))
-                
-        for key, process in self.processes.items():
-            process.start()
-            self.update_traffic_lights(key, True)  # Set traffic light to green
+                thread = ProcessThread(component, self.trial_path, enabled)
+                thread.update_traffic_light.connect(self.update_traffic_lights)
+                self.processes[component] = thread
 
-        #TODO Adding this makes the GUI becomes unresponsive when the processes are running
-        for key, process in self.processes.items():
-            process.join()
-            print(key, "joined")
-            self.update_traffic_lights(key, False)  # Set traffic light to red        
+        for key, thread in self.processes.items():
+            thread.start()
+            self.update_traffic_lights(key, True)
+        
+        # #TODO Adding this makes the GUI becomes unresponsive when the processes are running
+        # TODO: need to fix this, since there might be too many zombie processes
+        # for key, process in self.processes.items():
+        #     process.join()
+        #     print(key, "joined")
+        #     self.update_traffic_lights(key, False)  # Set traffic light to red    
 
     def update_traffic_lights(self, process_name, is_running):
         if is_running:
@@ -209,10 +239,38 @@ class MainGUI(QMainWindow):
             self.trafficLights[process_name].updateColor.emit('red')
             self.trafficLights[process_name].status = 'red'
         QApplication.processEvents()
-      
+
+    def select_target_files(self):
+        folder_path = str(QFileDialog.getExistingDirectory(self, "Select Folder"))
+        if folder_path:
+            file_filter = 'Image files (*.png *.jpg *.jpeg *.bmp *.gif)'
+            file_paths, _ = QFileDialog.getOpenFileNames(self, "Select Target Files", folder_path, file_filter)
+            self.targetFilesList.clear() 
+            self.targetFilesList.addItems(file_paths)  
+
+    def load_targets_into_combobox(self):
+        self.targetSelectionComboBox.clear()
+        self.targetSelectionComboBox.addItem("Select Target Folder", None)
+        targets_folder_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'assets', 'targets')
+        for filename in os.listdir(targets_folder_path):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                self.targetSelectionComboBox.addItem(filename, os.path.join(targets_folder_path, filename))
+
+    #TODO: need to add functionality for displaying it on the projector
+    def display_selected_image(self):
+        selected_image_path = self.targetSelectionComboBox.currentData()
+        if selected_image_path:
+            pixmap = QPixmap(selected_image_path)
+            self.imageDisplayLabel.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
+            self.imageDisplayApp.display_selected_image(selected_image_path)  # Update image in existing instance
+            self.imageDisplayApp.show()
+        else:
+            self.imageDisplayLabel.clear()
+            self.imageDisplayApp.hide() 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWin = MainGUI()
     mainWin.show()
+
     sys.exit(app.exec_())

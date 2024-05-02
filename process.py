@@ -7,7 +7,7 @@ from acquire_data.emg import emg
 from acquire_data.images import body_cam, dart_cam
 from common.constants import Paths
 from common.constants import Constants 
-from feature_extraction.apply_tracking import process_body_cam_images
+from feature_extraction.apply_tracking import main
 
 
 def start_bodycam_left(trial_path): #TODO better state management for left and right
@@ -35,4 +35,4 @@ def capture_board(trial_path):
 
 def run_feature_extraction(trial_path):
     print("Running feature extraction")
-    process_body_cam_images(trial_path)
+    main(trial_path, draw_skeleton=False)

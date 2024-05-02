@@ -1,4 +1,4 @@
-
+import csv
 import os
 import cv2
 from common.constants import Paths
@@ -65,16 +65,16 @@ def apply_histograms(trial_path, raw_path, processed_path, output_name, frame_ra
 
 def create_video_from_images(trial_path, image_path, output_name, frame_rate=30):
     img_dir = os.path.normpath(os.path.join(trial_path, image_path))
-    image_files = sorted(os.listdir(img_dir), key=sort_key_func)
+    image_files = sorted([f for f in os.listdir(img_dir) if f.endswith('.png')], key=sort_key_func)
 
     if not image_files:
-        print(f"No images found in {img_dir}. Exiting function.")
+        print(f"No images PNG found in {img_dir}. Exiting function.")
         return
 
     first_image_path = os.path.join(img_dir, image_files[0])
     first_image = cv2.imread(first_image_path)
     if first_image is None:
-        print(f"Failed to read the first image from {first_image_path}. Exiting function.")
+        print(f"Failed to read the first PNG image from {first_image_path}. Exiting function.")
         return
     height, width = first_image.shape[:2]
 
@@ -96,44 +96,70 @@ def create_video_from_images(trial_path, image_path, output_name, frame_rate=30)
     out.release()
     print(f"Video saved at {os.path.join(output_dir, output_name)}")
 
-
-def apply_pose_tracking_on_image(image_path, tracked_image_path=None):
+def apply_pose_tracking_on_image(image_path, tracked_image_path=None, draw_skeleton=False):
     with mp_pose.Pose(static_image_mode=True) as pose:
         image = cv2.imread(image_path)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = pose.process(image_rgb)
         
-        if results.pose_landmarks:
-            mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+        if draw_skeleton:
+            if results.pose_landmarks:
+                mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
         
-        if tracked_image_path:
-            cv2.imwrite(tracked_image_path, image)
-        else:
-            cv2.imshow('Tracked Pose', image)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+            if tracked_image_path:
+                cv2.imwrite(tracked_image_path, image)
+            else:
+                cv2.imshow('Tracked Pose', image)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+        
+        return results.pose_landmarks if results.pose_landmarks else None
 
-def process_images(trial_path, raw_path, processed_path):
+def save_landmarks_to_csv(landmarks, csv_path):
+    with open(csv_path, mode='w', newline='') as file:
+        csv_writer = csv.writer(file)
+        header = ['landmark', 'x', 'y', 'z', 'visibility']
+        csv_writer.writerow(header)
+        
+        for i, landmark in enumerate(landmarks.landmark):
+            csv_writer.writerow([i, landmark.x, landmark.y, landmark.z, landmark.visibility])
+
+def process_images(trial_path, raw_path, processed_path, draw_skeleton=False):
     raw_dir = os.path.normpath(os.path.join(trial_path, raw_path))
     processed_dir = os.path.normpath(os.path.join(trial_path, processed_path))
 
     for file_name in os.listdir(raw_dir):
         image_path = os.path.join(raw_dir, file_name)
         processed_image_path = os.path.join(processed_dir, f"processed_{file_name}")
-        apply_pose_tracking_on_image(image_path, processed_image_path)
+        landmarks = apply_pose_tracking_on_image(image_path, processed_image_path, draw_skeleton)
+        
+        if landmarks:
+            csv_path = os.path.join(processed_dir, f"landmarks_{file_name}.csv")
+            save_landmarks_to_csv(landmarks, csv_path)
 
-def process_body_cam_images(trial_path):
-    print("Applying pose tracking on body cam images")
-    process_images(trial_path, Paths.BODY_LEFT_RAW_PATH, Paths.BODY_LEFT_PROCESSED_PATH)
-    process_images(trial_path, Paths.BODY_RIGHT_RAW_PATH, Paths.BODY_RIGHT_PROCESSED_PATH)
-    
-    # print("Applying histograms on body cam images")
-    # apply_histograms(trial_path, Paths.BODY_LEFT_PROCESSED_PATH, Paths.BODY_LEFT_PROCESSED_PATH,
-    #                  "body_left_processed_with_hist.mp4")
-    # apply_histograms(trial_path, Paths.BODY_RIGHT_PROCESSED_PATH, Paths.BODY_RIGHT_PROCESSED_PATH, 
-    #                  "body_right_processed_with_hist.mp4")
 
+def apply_all_histograms(trial_path):
+    print("Applying histograms on body cam images")
+    apply_histograms(trial_path, Paths.BODY_LEFT_PROCESSED_PATH, Paths.BODY_LEFT_PROCESSED_PATH,
+                     "body_left_processed_with_hist.mp4")
+    apply_histograms(trial_path, Paths.BODY_RIGHT_PROCESSED_PATH, Paths.BODY_RIGHT_PROCESSED_PATH, 
+                     "body_right_processed_with_hist.mp4")
+
+def create_all_videos_from_images(trial_path):
     print("Creating video from body cam images")
     create_video_from_images(trial_path, Paths.BODY_LEFT_PROCESSED_PATH, "body_left_processed.mp4")
     create_video_from_images(trial_path, Paths.BODY_RIGHT_PROCESSED_PATH, "body_right_processed.mp4")
     create_video_from_images(trial_path, Paths.DARTBOARD_RAW_PATH, "dartboard_processed.mp4")
+
+def process_all_images(trial_path, draw_skeleton=False):
+    print("Applying pose tracking on body cam images")
+    process_images(trial_path, Paths.BODY_LEFT_RAW_PATH, Paths.BODY_LEFT_PROCESSED_PATH, 
+                   draw_skeleton=draw_skeleton)
+    process_images(trial_path, Paths.BODY_RIGHT_RAW_PATH, Paths.BODY_RIGHT_PROCESSED_PATH,
+                   draw_skeleton=draw_skeleton)
+
+
+def main(trial_path, draw_skeleton=False):
+    process_all_images(trial_path, draw_skeleton=draw_skeleton)
+    # create_all_videos_from_images(trial_path)
+    # apply_all_histograms(trial_path)

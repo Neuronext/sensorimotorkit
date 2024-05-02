@@ -12,10 +12,10 @@ class MetadataConstants:
 
     ENABLE_BODY_CAM = True
     ENABLE_DART_CAM = True
-    ENABLE_EEG = True
-    ENABLE_EMG = True
-    ENABLE_GLOVES = True
-    ENABLE_EYES = True
+    ENABLE_EEG = False
+    ENABLE_EMG = False
+    ENABLE_GLOVES = False
+    ENABLE_EYES = False
 
     CAMERA = "spinview" # "spinview" or "opencv"
 
@@ -60,7 +60,7 @@ class Constants:
     TRAFFIC_LIGHT_SIZE = 20 # pixels
 
     # Camera
-    ACQUIRE_TIME = 3 # in seconds
+    ACQUIRE_TIME = 7 # in seconds
     FRAME_RATE_BODY_CAM = 120 # Hz
     FRAME_RATE_DART_CAM = 30 # Hz
     RESOLUTION_BODY_CAM = (600, 960) # (height, width) in pixels
@@ -69,7 +69,7 @@ class Constants:
     # EEG
     if MetadataConstants.ENABLE_EEG == True:
         EEG_BOARD_ID = 2 
-        EEG_SERIAL_PORT = 'COM6'
+        EEG_SERIAL_PORT = 'COM3'
         EEG_FILE_NAME = Paths.EEG_PATH + '/eeg.csv'
     
     # EMG
