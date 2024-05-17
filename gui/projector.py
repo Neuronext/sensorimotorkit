@@ -1,6 +1,5 @@
-import sys
-import os
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QColorDialog, QFileDialog
+import sys, os
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout, QColorDialog, QFileDialog
 from PyQt5.QtGui import QPixmap, QColor, QCursor
 from PyQt5.QtCore import Qt, QPoint, QFile, QTextStream
 
@@ -9,25 +8,19 @@ class ImageDisplayApp(QWidget):
         super().__init__()
         
         self.setWindowTitle("Image Display App")
-        self.setMinimumSize(400, 400)
-
+        self.setMinimumSize(500, 500)
         self.image_path = image_path
 
         self.image_label = QLabel(self)
         self.display_selected_image()
-
         color_button = QPushButton("Change Background Color", self)
         color_button.clicked.connect(self.change_background_color)
-
         zoom_in_button = QPushButton("Zoom In", self)
         zoom_in_button.clicked.connect(self.zoom_in)
-
         zoom_out_button = QPushButton("Zoom Out", self)
         zoom_out_button.clicked.connect(self.zoom_out)
-
         save_button = QPushButton("Save", self)
         save_button.clicked.connect(self.save_settings)
-
         layout = QVBoxLayout()
         layout.addWidget(self.image_label)
         layout.addWidget(color_button)
@@ -41,11 +34,10 @@ class ImageDisplayApp(QWidget):
         self.dragging = False
 
         self.load_settings()
-
     def set_image(self):
-        pixmap = QPixmap(image_path)
-        self.image_label.setPixmap(pixmap)
-        self.image_label.setFixedSize(pixmap.size())
+            pixmap = QPixmap(image_path)
+            self.image_label.setPixmap(pixmap)
+            self.image_label.setFixedSize(pixmap.size())
 
     def display_selected_image(self):
         pixmap = QPixmap(self.image_path)
@@ -82,12 +74,12 @@ class ImageDisplayApp(QWidget):
 
     def mouseMoveEvent(self, event):
         if self.dragging:
-            new_pos = self.mapToParent(event.pos() - self.offset)
-            self.image_label.move(new_pos)
+                    new_pos = self.mapToParent(event.pos() - self.offset)
+                    self.image_label.move(new_pos)
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.dragging = False
+                self.dragging = False
 
     def save_settings(self):
         settings_file = QFile("settings.txt")

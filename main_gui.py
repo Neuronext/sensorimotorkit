@@ -1,25 +1,15 @@
 import sys
-import multiprocessing
 import os
 import datetime
 import csv
 import time
-
-# import PyQt5 modules
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QLabel, QFormLayout, QFileDialog, QListWidget
-from PyQt5.QtCore import Qt, QTimer, QThread, pyqtSignal, pyqtSignal
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QComboBox
-from PyQt5.QtGui import QPixmap
-
-
-# import custom modules
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QFormLayout, QFileDialog, QComboBox
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtGui import QIcon, QPixmap
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
-from gui.custom_title_bar import CustomTitleBar
 from common.constants import Constants, MetadataConstants, Components
-from common import common_utils
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
 from gui.projector import ImageDisplayApp
 
@@ -101,10 +91,8 @@ class MainGUI(QMainWindow):
         layout.addLayout(buttonsLayout)
         layout.addWidget(self.folderDialog)
 
-        self.targetSelectionComboBox = QComboBox(self)
-        self.targetSelectionComboBox.addItem("Select Target Folder", None)
-        self.load_targets_into_combobox()
-        self.targetSelectionComboBox.currentIndexChanged.connect(self.display_selected_image)
+        self.targetSelectionComboBox = QPushButton('Select Target Folder', self)
+        self.targetSelectionComboBox.clicked.connect(self.select_target_folder)
         layout.addWidget(self.targetSelectionComboBox)
 
         self.imageDisplayLabel = QLabel(self)
@@ -120,7 +108,7 @@ class MainGUI(QMainWindow):
         centralWidget.setMinimumSize(800, 600)
         self.setCentralWidget(centralWidget)
 
-        self.imageDisplayApp = ImageDisplayApp("","")
+        self.imageDisplayApp = None
 
     def update_metadata_constants(self, layout):
         form_layout = QFormLayout()
@@ -152,7 +140,6 @@ class MainGUI(QMainWindow):
         # Add the form layout to the main layout
         layout.addLayout(form_layout)
 
-
     def append_metadata_to_csv(self):
         # Check if file exists, and whether we need to write headers
         file_exists = os.path.isfile(MetadataConstants.METADATA_FILE_NAME)
@@ -174,7 +161,6 @@ class MainGUI(QMainWindow):
                 self.age_edit.text(),
                 self.gender_edit.text(),
                 os.path.normpath(self.folderDialog.get_selected_folder()),
-                # self.trial_path,
                 selected_target,
                 self.comments_edit.text()
             ])
@@ -240,37 +226,102 @@ class MainGUI(QMainWindow):
             self.trafficLights[process_name].status = 'red'
         QApplication.processEvents()
 
-    def select_target_files(self):
+    def select_target_folder(self):
         folder_path = str(QFileDialog.getExistingDirectory(self, "Select Folder"))
         if folder_path:
-            file_filter = 'Image files (*.png *.jpg *.jpeg *.bmp *.gif)'
-            file_paths, _ = QFileDialog.getOpenFileNames(self, "Select Target Files", folder_path, file_filter)
-            self.targetFilesList.clear() 
-            self.targetFilesList.addItems(file_paths)  
-
-    def load_targets_into_combobox(self):
-        self.targetSelectionComboBox.clear()
-        self.targetSelectionComboBox.addItem("Select Target Folder", None)
-        targets_folder_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'assets', 'targets')
-        for filename in os.listdir(targets_folder_path):
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-                self.targetSelectionComboBox.addItem(filename, os.path.join(targets_folder_path, filename))
-
-    #TODO: need to add functionality for displaying it on the projector
-    def display_selected_image(self):
-        selected_image_path = self.targetSelectionComboBox.currentData()
-        if selected_image_path:
-            pixmap = QPixmap(selected_image_path)
-            self.imageDisplayLabel.setPixmap(pixmap.scaled(100, 100, Qt.KeepAspectRatio))
-            self.imageDisplayApp.display_selected_image(selected_image_path)  # Update image in existing instance
+            # Pass the folder path to the ImageDisplayApp
+            self.imageDisplayApp = ImageDisplayApp(folder_path)
             self.imageDisplayApp.show()
-        else:
-            self.imageDisplayLabel.clear()
-            self.imageDisplayApp.hide() 
+
+class ImageDisplayApp(QWidget):
+    def __init__(self, folder_path):
+        super().__init__()
+        self.setWindowTitle("Image Display App")
+        self.setMinimumSize(500, 500)
+        self.folder_path = folder_path
+        self.current_image_index = 0
+        self.image_paths = self.load_image_paths()
+        self.image_label = QLabel(self)
+        self.image_name_label = QLabel(self)  # Add a label for displaying the image name
+        self.display_current_image()
+
+        # Add Next and Back buttons
+        self.next_button = QPushButton("Next", self)
+        self.next_button.clicked.connect(self.next_image)
+        self.back_button = QPushButton("Back", self)
+        self.back_button.clicked.connect(self.previous_image)
+
+        # Layout for the buttons
+        button_layout = QVBoxLayout()
+        button_layout.addWidget(self.next_button)
+        button_layout.addWidget(self.back_button)
+
+        # Set button size
+        self.next_button.setFixedSize(80, 30)
+        self.back_button.setFixedSize(80, 30)
+
+        # Main layout
+        layout = QVBoxLayout()
+        layout.addWidget(self.image_label, alignment=Qt.AlignCenter)
+        layout.addWidget(self.image_name_label, alignment=Qt.AlignCenter)  # Add the image name label
+        layout.addLayout(button_layout)
+        self.setLayout(layout)
+
+    def load_image_paths(self):
+        image_paths = []
+        for filename in os.listdir(self.folder_path):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                image_paths.append(os.path.join(self.folder_path, filename))
+        return image_paths
+
+    def display_current_image(self):
+        if self.image_paths:
+            pixmap = QPixmap(self.image_paths[self.current_image_index])
+            pixmap = pixmap.scaled(150, 150, Qt.KeepAspectRatio)  # Resize the pixmap
+            self.image_label.setPixmap(pixmap)
+            # Update the image name label
+            image_name = os.path.basename(self.image_paths[self.current_image_index])
+            self.image_name_label.setText(image_name)
+
+    def next_image(self):
+        if self.current_image_index < len(self.image_paths) - 1:
+            self.current_image_index += 1
+            self.display_current_image()
+
+    def previous_image(self):
+        if self.current_image_index > 0:
+            self.current_image_index -= 1
+            self.display_current_image()
+
+
+    def load_image_paths(self):
+        image_paths = []
+        for filename in os.listdir(self.folder_path):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                image_paths.append(os.path.join(self.folder_path, filename))
+        return image_paths
+
+    def display_current_image(self):
+        if self.image_paths:
+            pixmap = QPixmap(self.image_paths[self.current_image_index])
+            pixmap = pixmap.scaled(150, 150, Qt.KeepAspectRatio)  # Resize the pixmap
+            self.image_label.setPixmap(pixmap)
+            # Update the image name label
+            image_name = os.path.basename(self.image_paths[self.current_image_index])
+            self.image_name_label.setText(image_name)
+
+    def next_image(self):
+        if self.current_image_index < len(self.image_paths) - 1:
+            self.current_image_index += 1
+            self.display_current_image()
+
+    def previous_image(self):
+        if self.current_image_index > 0:
+            self.current_image_index -= 1
+            self.display_current_image()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWin = MainGUI()
     mainWin.show()
-
     sys.exit(app.exec_())
