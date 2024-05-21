@@ -6,6 +6,7 @@ import time
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QFormLayout, QFileDialog, QComboBox
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon, QPixmap
+
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
@@ -55,10 +56,26 @@ class MainGUI(QMainWindow):
         # Start, Stop, Pause buttons
         self.trialCountLabel = QLabel(f"Trial: 0/{MetadataConstants.TRIALS_PER_BATCH}")
         
+        #button layout
         buttonsLayout = QHBoxLayout()
         self.startBtn = QPushButton('Start', self)
         self.stopBtn = QPushButton('Stop', self)
         self.pauseBtn = QPushButton('Pause', self)
+
+        # Add Next and Back buttons
+        self.next_button = QPushButton("Next", self)
+        self.next_button.clicked.connect(self.next_image)
+        self.back_button = QPushButton("Back", self)
+        self.back_button.clicked.connect(self.previous_image)
+
+        # Layout for the buttons
+        button_layout = QVBoxLayout()
+        button_layout.addWidget(self.next_button)
+        button_layout.addWidget(self.back_button)
+
+        # Set button size
+        self.next_button.setFixedSize(80, 30)
+        self.back_button.setFixedSize(80, 30)
         
         self.traffic_light_layout = QHBoxLayout()        
 
@@ -102,6 +119,9 @@ class MainGUI(QMainWindow):
         layout.addLayout(self.traffic_light_layout)
         self.add_metadata_fields(layout)
 
+        # next/previous button layout
+        layout.addLayout(button_layout)
+        
         # Set main widget
         centralWidget = QWidget()
         centralWidget.setLayout(layout)
@@ -109,6 +129,8 @@ class MainGUI(QMainWindow):
         self.setCentralWidget(centralWidget)
 
         self.imageDisplayApp = None
+        self.image_paths = []
+        self.current_image_index = 0
 
     def update_metadata_constants(self, layout):
         form_layout = QFormLayout()
@@ -229,54 +251,22 @@ class MainGUI(QMainWindow):
     def select_target_folder(self):
         folder_path = str(QFileDialog.getExistingDirectory(self, "Select Folder"))
         if folder_path:
-            # Pass the folder path to the ImageDisplayApp
-            self.imageDisplayApp = ImageDisplayApp(folder_path)
-            self.imageDisplayApp.show()
+            self.image_paths = self.load_image_paths(folder_path)
+            self.current_image_index = 0
+            self.display_current_image()
 
-class ImageDisplayApp(QWidget):
-    def __init__(self, folder_path):
-        super().__init__()
-        self.setWindowTitle("Image Display App")
-        self.setMinimumSize(500, 500)
-        self.folder_path = folder_path
-        self.current_image_index = 0
-        self.image_paths = self.load_image_paths()
-        self.image_label = QLabel(self)
-        self.display_current_image()
-
-        # Add Next and Back buttons
-        self.next_button = QPushButton("Next", self)
-        self.next_button.clicked.connect(self.next_image)
-        self.back_button = QPushButton("Back", self)
-        self.back_button.clicked.connect(self.previous_image)
-
-        # Layout for the buttons
-        button_layout = QVBoxLayout()
-        button_layout.addWidget(self.next_button)
-        button_layout.addWidget(self.back_button)
-
-         # Set button size
-        self.next_button.setFixedSize(80, 30)
-        self.back_button.setFixedSize(80, 30)
-
-        # Main layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.image_label, alignment=Qt.AlignCenter)
-        layout.addLayout(button_layout)
-        self.setLayout(layout)
-
-    def load_image_paths(self):
+    def load_image_paths(self, folder_path):
         image_paths = []
-        for filename in os.listdir(self.folder_path):
+        for filename in os.listdir(folder_path):
             if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-                image_paths.append(os.path.join(self.folder_path, filename))
+                image_paths.append(os.path.join(folder_path, filename))
         return image_paths
 
     def display_current_image(self):
         if self.image_paths:
             pixmap = QPixmap(self.image_paths[self.current_image_index])
-            self.image_label.setPixmap(pixmap)
-            self.image_label.setFixedSize(pixmap.size())
+            self.imageDisplayLabel.setPixmap(pixmap)
+            self.imageDisplayLabel.setFixedSize(pixmap.size())
 
     def next_image(self):
         if self.current_image_index < len(self.image_paths) - 1:
