@@ -242,7 +242,6 @@ class ImageDisplayApp(QWidget):
         self.current_image_index = 0
         self.image_paths = self.load_image_paths()
         self.image_label = QLabel(self)
-        self.image_name_label = QLabel(self)  # Add a label for displaying the image name
         self.display_current_image()
 
         # Add Next and Back buttons
@@ -256,14 +255,13 @@ class ImageDisplayApp(QWidget):
         button_layout.addWidget(self.next_button)
         button_layout.addWidget(self.back_button)
 
-        # Set button size
+         # Set button size
         self.next_button.setFixedSize(80, 30)
         self.back_button.setFixedSize(80, 30)
 
         # Main layout
         layout = QVBoxLayout()
         layout.addWidget(self.image_label, alignment=Qt.AlignCenter)
-        layout.addWidget(self.image_name_label, alignment=Qt.AlignCenter)  # Add the image name label
         layout.addLayout(button_layout)
         self.setLayout(layout)
 
@@ -277,38 +275,8 @@ class ImageDisplayApp(QWidget):
     def display_current_image(self):
         if self.image_paths:
             pixmap = QPixmap(self.image_paths[self.current_image_index])
-            pixmap = pixmap.scaled(150, 150, Qt.KeepAspectRatio)  # Resize the pixmap
             self.image_label.setPixmap(pixmap)
-            # Update the image name label
-            image_name = os.path.basename(self.image_paths[self.current_image_index])
-            self.image_name_label.setText(image_name)
-
-    def next_image(self):
-        if self.current_image_index < len(self.image_paths) - 1:
-            self.current_image_index += 1
-            self.display_current_image()
-
-    def previous_image(self):
-        if self.current_image_index > 0:
-            self.current_image_index -= 1
-            self.display_current_image()
-
-
-    def load_image_paths(self):
-        image_paths = []
-        for filename in os.listdir(self.folder_path):
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-                image_paths.append(os.path.join(self.folder_path, filename))
-        return image_paths
-
-    def display_current_image(self):
-        if self.image_paths:
-            pixmap = QPixmap(self.image_paths[self.current_image_index])
-            pixmap = pixmap.scaled(150, 150, Qt.KeepAspectRatio)  # Resize the pixmap
-            self.image_label.setPixmap(pixmap)
-            # Update the image name label
-            image_name = os.path.basename(self.image_paths[self.current_image_index])
-            self.image_name_label.setText(image_name)
+            self.image_label.setFixedSize(pixmap.size())
 
     def next_image(self):
         if self.current_image_index < len(self.image_paths) - 1:
