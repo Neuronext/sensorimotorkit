@@ -40,6 +40,7 @@ class ImageDisplayApp(QWidget):
         self.current_image_index = 0
         self.image_paths = self.load_image_paths()
         self.image_label = QLabel(self)
+        self.image_label.setAlignment(Qt.AlignCenter)
         self.display_current_image()
 
         # Main layout
@@ -57,8 +58,9 @@ class ImageDisplayApp(QWidget):
     def display_current_image(self):
         if self.image_paths:
             pixmap = QPixmap(self.image_paths[self.current_image_index])
+            pixmap = pixmap.scaled(150, 150, Qt.KeepAspectRatio)
             self.image_label.setPixmap(pixmap)
-            self.image_label.setFixedSize(pixmap.size())
+            self.image_label.setFixedSize(150, 150)  # Set fixed size for the label
 
     def next_image(self):
         if self.current_image_index < len(self.image_paths) - 1:
@@ -104,6 +106,10 @@ class MainGUI(QMainWindow):
         self.next_button.clicked.connect(self.next_image)
         self.back_button = QPushButton("Back", self)
         self.back_button.clicked.connect(self.previous_image)
+
+        # Add image name label
+        self.image_name_label = QLabel(self)
+        layout.addWidget(self.image_name_label)
 
         # Layout for the buttons
         button_layout = QVBoxLayout()
