@@ -6,13 +6,11 @@ import time
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QFormLayout, QFileDialog, QComboBox
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon, QPixmap
-
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
 from common.constants import Constants, MetadataConstants, Components
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
-from gui.projector import ImageDisplayApp
 
 def load_stylesheet(file_path):
     with open(file_path, "r") as file:
@@ -32,6 +30,45 @@ class ProcessThread(QThread):
             process_function = globals()[f"start_{self.component}"]
             process_function(self.trial_path)
             self.update_traffic_light.emit(self.component, False)
+
+class ImageDisplayApp(QWidget):
+    def __init__(self, folder_path):
+        super().__init__()
+        self.setWindowTitle("Image Display App")
+        self.setMinimumSize(500, 500)
+        self.folder_path = folder_path
+        self.current_image_index = 0
+        self.image_paths = self.load_image_paths()
+        self.image_label = QLabel(self)
+        self.display_current_image()
+
+        # Main layout
+        layout = QVBoxLayout()
+        layout.addWidget(self.image_label, alignment=Qt.AlignCenter)
+        self.setLayout(layout)
+
+    def load_image_paths(self):
+        image_paths = []
+        for filename in os.listdir(self.folder_path):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                image_paths.append(os.path.join(self.folder_path, filename))
+        return image_paths
+
+    def display_current_image(self):
+        if self.image_paths:
+            pixmap = QPixmap(self.image_paths[self.current_image_index])
+            self.image_label.setPixmap(pixmap)
+            self.image_label.setFixedSize(pixmap.size())
+
+    def next_image(self):
+        if self.current_image_index < len(self.image_paths) - 1:
+            self.current_image_index += 1
+            self.display_current_image()
+
+    def previous_image(self):
+        if self.current_image_index > 0:
+            self.current_image_index -= 1
+            self.display_current_image()
 
 class MainGUI(QMainWindow):
 
@@ -95,7 +132,6 @@ class MainGUI(QMainWindow):
         buttonsLayout.addWidget(self.stopBtn)
         buttonsLayout.addWidget(self.pauseBtn)
         
-
         # add traffic lights to layout
         for key, light in self.trafficLights.items():    
             label = QLabel(key.replace('_', ' ').title()) 
@@ -112,16 +148,13 @@ class MainGUI(QMainWindow):
         self.targetSelectionComboBox.clicked.connect(self.select_target_folder)
         layout.addWidget(self.targetSelectionComboBox)
 
-        self.imageDisplayLabel = QLabel(self)
-        layout.addWidget(self.imageDisplayLabel)
-
         self.update_metadata_constants(layout)
         layout.addLayout(self.traffic_light_layout)
         self.add_metadata_fields(layout)
 
         # next/previous button layout
         layout.addLayout(button_layout)
-        
+
         # Set main widget
         centralWidget = QWidget()
         centralWidget.setLayout(layout)
@@ -129,8 +162,6 @@ class MainGUI(QMainWindow):
         self.setCentralWidget(centralWidget)
 
         self.imageDisplayApp = None
-        self.image_paths = []
-        self.current_image_index = 0
 
     def update_metadata_constants(self, layout):
         form_layout = QFormLayout()
@@ -251,32 +282,16 @@ class MainGUI(QMainWindow):
     def select_target_folder(self):
         folder_path = str(QFileDialog.getExistingDirectory(self, "Select Folder"))
         if folder_path:
-            self.image_paths = self.load_image_paths(folder_path)
-            self.current_image_index = 0
-            self.display_current_image()
-
-    def load_image_paths(self, folder_path):
-        image_paths = []
-        for filename in os.listdir(folder_path):
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-                image_paths.append(os.path.join(folder_path, filename))
-        return image_paths
-
-    def display_current_image(self):
-        if self.image_paths:
-            pixmap = QPixmap(self.image_paths[self.current_image_index])
-            self.imageDisplayLabel.setPixmap(pixmap)
-            self.imageDisplayLabel.setFixedSize(pixmap.size())
+            self.imageDisplayApp = ImageDisplayApp(folder_path)
+            self.imageDisplayApp.show()
 
     def next_image(self):
-        if self.current_image_index < len(self.image_paths) - 1:
-            self.current_image_index += 1
-            self.display_current_image()
+        if self.imageDisplayApp:
+            self.imageDisplayApp.next_image()
 
     def previous_image(self):
-        if self.current_image_index > 0:
-            self.current_image_index -= 1
-            self.display_current_image()
+        if self.imageDisplayApp:
+            self.imageDisplayApp.previous_image()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
