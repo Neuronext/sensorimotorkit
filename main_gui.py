@@ -32,6 +32,7 @@ class ProcessThread(QThread):
             self.update_traffic_light.emit(self.component, False)
 
 class ImageDisplayApp(QWidget):
+    image_changed = pyqtSignal(str)
     def __init__(self, folder_path):
         super().__init__()
         self.setWindowTitle("Image Display App")
@@ -50,10 +51,12 @@ class ImageDisplayApp(QWidget):
 
     def load_image_paths(self):
         image_paths = []
-        for filename in os.listdir(self.folder_path):
+        for filename in sorted(os.listdir(self.folder_path), key=lambda x: int(x.split('.')[0])):
             if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
                 image_paths.append(os.path.join(self.folder_path, filename))
         return image_paths
+
+
 
     def display_current_image(self):
         if self.image_paths:
@@ -61,6 +64,7 @@ class ImageDisplayApp(QWidget):
             pixmap = pixmap.scaled(150, 150, Qt.KeepAspectRatio)
             self.image_label.setPixmap(pixmap)
             self.image_label.setFixedSize(150, 150)  # Set fixed size for the label
+            self.image_changed.emit(os.path.basename(self.image_paths[self.current_image_index]))
 
     def next_image(self):
         if self.current_image_index < len(self.image_paths) - 1:
@@ -112,13 +116,13 @@ class MainGUI(QMainWindow):
         layout.addWidget(self.image_name_label)
 
         # Layout for the buttons
-        button_layout = QVBoxLayout()
-        button_layout.addWidget(self.next_button)
+        button_layout = QHBoxLayout()
         button_layout.addWidget(self.back_button)
+        button_layout.addWidget(self.next_button)
 
         # Set button size
-        self.next_button.setFixedSize(80, 30)
         self.back_button.setFixedSize(80, 30)
+        self.next_button.setFixedSize(80, 30)
         
         self.traffic_light_layout = QHBoxLayout()        
 
@@ -290,6 +294,8 @@ class MainGUI(QMainWindow):
         if folder_path:
             self.imageDisplayApp = ImageDisplayApp(folder_path)
             self.imageDisplayApp.show()
+            # Connect the signal to the slot
+            self.imageDisplayApp.image_changed.connect(self.update_image_name_label)
 
     def next_image(self):
         if self.imageDisplayApp:
@@ -298,6 +304,10 @@ class MainGUI(QMainWindow):
     def previous_image(self):
         if self.imageDisplayApp:
             self.imageDisplayApp.previous_image()
+
+    def update_image_name_label(self, image_name):
+        # Update the image name label
+        self.image_name_label.setText(f"Current Image: {image_name}")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
