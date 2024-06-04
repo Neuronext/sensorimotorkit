@@ -58,8 +58,6 @@ class ImageDisplayApp(QWidget):
                 image_paths.append(os.path.join(self.folder_path, filename))
         return image_paths
 
-
-
     def display_current_image(self):
         if self.image_paths:
             pixmap = QPixmap(self.image_paths[self.current_image_index])
@@ -300,7 +298,8 @@ class MainGUI(QMainWindow):
     def select_target_folder(self):
         folder_path = str(QFileDialog.getExistingDirectory(self, "Select Folder"))
         if folder_path:
-            self.imageDisplayApp = ImageDisplayApp(folder_path)
+            if not self.imageDisplayApp:  # Create only if not already created
+                self.imageDisplayApp = ImageDisplayApp(folder_path)
             self.imageDisplayApp.show()
             # Connect the signal to the slot
             self.imageDisplayApp.image_changed.connect(self.update_image_name_label)
