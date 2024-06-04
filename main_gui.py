@@ -6,9 +6,11 @@ import time
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QFormLayout, QFileDialog, QComboBox
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtMultimedia import QSound
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
+from common import common_utils
 from common.constants import Constants, MetadataConstants, Components
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
 
@@ -104,6 +106,11 @@ class MainGUI(QMainWindow):
         self.startBtn = QPushButton('Start', self)
         self.stopBtn = QPushButton('Stop', self)
         self.pauseBtn = QPushButton('Pause', self)
+
+        # Add sound file path/effect
+        self.sound_file_path = "c:\\Users\\Data acquisition\\Downloads\\ding.wav"
+
+        self.start_sound = QSound(self.sound_file_path)
 
         # Add Next and Back buttons
         self.next_button = QPushButton("Next", self)
@@ -245,6 +252,7 @@ class MainGUI(QMainWindow):
         self.append_metadata_to_csv()
 
     def stop_batch(self):
+        self.start.sound.play()
         # To stop the batch, terminate all running processes
         for key, process in self.processes.items():
             if process.is_alive():
