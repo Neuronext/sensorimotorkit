@@ -3,16 +3,19 @@ import os
 import datetime
 import csv
 import time
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QFormLayout, QFileDialog, QComboBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QHBoxLayout, QLineEdit, QFormLayout, QFileDialog, QComboBox, QCheckBox
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtMultimedia import QSound
+from PyQt5.QtMultimedia import QSoundEffect
+from PyQt5.QtCore import QUrl
 from gui.folder_dialog import FolderDialog
 from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
 from common import common_utils
 from common.constants import Constants, MetadataConstants, Components
 from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
+import threading
 
 def load_stylesheet(file_path):
     with open(file_path, "r") as file:
@@ -26,12 +29,14 @@ class ProcessThread(QThread):
         self.component = component
         self.trial_path = trial_path
         self.enabled = enabled
+        self.completion_event = threading.Event()
 
     def run(self):
         if self.enabled:
             process_function = globals()[f"start_{self.component}"]
             process_function(self.trial_path)
             self.update_traffic_light.emit(self.component, False)
+            self.completion_event.set()
 
 class ImageDisplayApp(QWidget):
     image_changed = pyqtSignal(str)
@@ -61,9 +66,9 @@ class ImageDisplayApp(QWidget):
     def display_current_image(self):
         if self.image_paths:
             pixmap = QPixmap(self.image_paths[self.current_image_index])
-            pixmap = pixmap.scaled(150, 150, Qt.KeepAspectRatio)
+            pixmap = pixmap.scaled(250, 250, Qt.KeepAspectRatio)
             self.image_label.setPixmap(pixmap)
-            self.image_label.setFixedSize(150, 150)  # Set fixed size for the label
+            self.image_label.setFixedSize(250, 250)  # Set fixed size for the label
             self.image_changed.emit(os.path.basename(self.image_paths[self.current_image_index]))
 
     def next_image(self):
@@ -98,17 +103,16 @@ class MainGUI(QMainWindow):
 
         # Start, Stop, Pause buttons
         self.trialCountLabel = QLabel(f"Trial: 0/{MetadataConstants.TRIALS_PER_BATCH}")
-        
+
+
+        self.checkbox = QCheckBox('Autoplay', self)
+        layout.addWidget(self.checkbox)
+
         #button layout
         buttonsLayout = QHBoxLayout()
         self.startBtn = QPushButton('Start', self)
         self.stopBtn = QPushButton('Stop', self)
         self.pauseBtn = QPushButton('Pause', self)
-
-        # Add sound file path/effect
-        self.sound_file_path = "c:\\Users\\Data acquisition\\Downloads\\ding.wav"
-
-        self.start_sound = QSound(self.sound_file_path)
 
         # Add Next and Back buttons
         self.next_button = QPushButton("Next", self)
@@ -186,7 +190,6 @@ class MainGUI(QMainWindow):
         form_layout.addRow("Acquire Time:", self.acquire_time)
         layout.addLayout(form_layout)
 
-
     def add_metadata_fields(self, layout):
         form_layout = QFormLayout()
 
@@ -211,6 +214,7 @@ class MainGUI(QMainWindow):
     def append_metadata_to_csv(self):
         # Check if file exists, and whether we need to write headers
         file_exists = os.path.isfile(MetadataConstants.METADATA_FILE_NAME)
+
         
         with open(MetadataConstants.METADATA_FILE_NAME, mode='a', newline='\n') as file:
             writer = csv.writer(file)
@@ -220,7 +224,7 @@ class MainGUI(QMainWindow):
                 writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Trial Folder', 'Target', 'Comments'])
             
             # Write 
-            selected_target_path = self.targetSelectionComboBox.currentData()
+            selected_target_path = self.targetSelectionComboBox.text()
             selected_target = os.path.basename(selected_target_path) if selected_target_path else "None"
             writer.writerow([
                 self.date_edit.text(),
@@ -234,13 +238,16 @@ class MainGUI(QMainWindow):
             ])
     
     def start_batch(self):
-
+        
         for trial in range(MetadataConstants.TRIALS_PER_BATCH): 
             self.trialCountLabel.setText(f"Trial: {trial+1}/{MetadataConstants.TRIALS_PER_BATCH}")
             QApplication.processEvents()
             self.run_trial()
+            
             # sleep for 1 second between trials
-            time.sleep(MetadataConstants.SLEEP_TIME_BETWEEN_TRIALS)
+            # time.sleep(MetadataConstants.SLEEP_TIME_BETWEEN_TRIALS)
+        
+        
 
         # Reset the label after the batch is completed
         self.trialCountLabel.setText(f"Trial: 0/{MetadataConstants.TRIALS_PER_BATCH}")
@@ -248,9 +255,9 @@ class MainGUI(QMainWindow):
         # Add metadata to csv
         print("Adding metadata to csv")
         self.append_metadata_to_csv()
+        
 
     def stop_batch(self):
-        self.start.sound.play()
         # To stop the batch, terminate all running processes
         for key, process in self.processes.items():
             if process.is_alive():
@@ -277,12 +284,13 @@ class MainGUI(QMainWindow):
             thread.start()
             self.update_traffic_lights(key, True)
         
-        # #TODO Adding this makes the GUI becomes unresponsive when the processes are running
-        # TODO: need to fix this, since there might be too many zombie processes
-        # for key, process in self.processes.items():
-        #     process.join()
-        #     print(key, "joined")
-        #     self.update_traffic_lights(key, False)  # Set traffic light to red    
+        for thread in self.processes.values():
+            thread.completion_event.wait()
+
+        time.sleep(2)
+        if self.checkbox.isChecked():
+            self.autoplay()
+        
 
     def update_traffic_lights(self, process_name, is_running):
         if is_running:
@@ -293,6 +301,7 @@ class MainGUI(QMainWindow):
             # print("updating traffic light to red")
             self.trafficLights[process_name].updateColor.emit('red')
             self.trafficLights[process_name].status = 'red'
+
         QApplication.processEvents()
 
     def select_target_folder(self):
@@ -303,6 +312,10 @@ class MainGUI(QMainWindow):
             self.imageDisplayApp.show()
             # Connect the signal to the slot
             self.imageDisplayApp.image_changed.connect(self.update_image_name_label)
+
+    def autoplay(self):
+        self.next_image()
+        self.start_batch()
 
     def next_image(self):
         if self.imageDisplayApp:

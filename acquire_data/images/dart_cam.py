@@ -2,9 +2,17 @@ import cv2
 import time
 import os
 from common.constants import Paths
+import simpleaudio as sa
 
 def acquire_dart_images(cam_index, trial_path, fourcc, frame_rate, barrier, cam_folder, acquire_time):
     print(f"Starting dart camera {cam_index+1}")
+    sound_file_path = 'C:/Users/Data acquisition/sensorimotorkit/assets/throw_sound.wav'
+
+    # Play the sound
+    wave_obj = sa.WaveObject.from_wave_file(sound_file_path)
+    play_obj = wave_obj.play()
+    play_obj.wait_done() 
+       
     cap = cv2.VideoCapture(cam_index)
     ret, frame = cap.read()
     if not ret:

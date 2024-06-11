@@ -50,7 +50,7 @@ class MovingDotApp:
 
 def main():
     root = tk.Tk()
-    root.geometry('+1565+205')  # Specify window location
+    root.geometry('+1725+225')  # Specify window location
     root.overrideredirect(True)  # Remove window header
     app = MovingDotApp(root, width=400, height=400, start_x=200, start_y=200, radius=125)
     root.mainloop()

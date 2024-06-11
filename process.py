@@ -16,7 +16,7 @@ def start_bodycam_left(trial_path): #TODO better state management for left and r
 
 def start_bodycam_right(trial_path):
     print(f"Collecting bodycam right - cam_index 1 data")
-    body_cam.acquire_images_common(1, trial_path, None, Constants.FRAME_RATE_BODY_CAM, None, Paths.BODY_RIGHT_RAW_PATH, Constants.ACQUIRE_TIME)
+    #body_cam.acquire_images_common(0, trial_path, None, Constants.FRAME_RATE_BODY_CAM, None, Paths.BODY_RIGHT_RAW_PATH, Constants.ACQUIRE_TIME)
 
 def start_dartcam(trial_path):
     print(f"Collecting dartcam")

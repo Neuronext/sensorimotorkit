@@ -14,7 +14,7 @@ class MetadataConstants:
     ENABLE_DART_CAM = True
     ENABLE_EEG = False
     ENABLE_EMG = False
-    ENABLE_GLOVES = True
+    ENABLE_GLOVES = False
     ENABLE_EYES = False
 
     CAMERA = "spinview" # "spinview" or "opencv"
