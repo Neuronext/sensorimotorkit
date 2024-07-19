@@ -86,6 +86,9 @@ class MainGUI(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.selected_target_path = ""  # For the target folder path
+        self.current_image_name = ""
+
         # Load and apply stylesheet
         stylesheet = load_stylesheet("gui/style.css")
         self.setStyleSheet(stylesheet)
@@ -215,7 +218,6 @@ class MainGUI(QMainWindow):
         # Check if file exists, and whether we need to write headers
         file_exists = os.path.isfile(MetadataConstants.METADATA_FILE_NAME)
 
-        
         with open(MetadataConstants.METADATA_FILE_NAME, mode='a', newline='\n') as file:
             writer = csv.writer(file)
             
@@ -224,8 +226,7 @@ class MainGUI(QMainWindow):
                 writer.writerow(['Date', 'Participant ID', 'Handedness', 'Age', 'Gender', 'Trial Folder', 'Target', 'Comments'])
             
             # Write 
-            selected_target_path = self.targetSelectionComboBox.text()
-            selected_target = os.path.basename(selected_target_path) if selected_target_path else "None"
+            selected_target = self.current_image_name if self.current_image_name else "None"
             writer.writerow([
                 self.date_edit.text(),
                 self.participant_id_edit.text(),
@@ -289,7 +290,16 @@ class MainGUI(QMainWindow):
 
         time.sleep(2)
         if self.checkbox.isChecked():
-            self.autoplay()
+            #check if trail 45 or trial 135. stop on these trials
+            trial_num = int(self.image_name_label.text().split(":")[1].split('.')[0].strip())
+            print(trial_num)
+            if trial_num != 3 and trial_num != 134 and trial_num != 179:
+                print("autoplaying")
+                self.autoplay()
+            else:
+                print("stopping autoplay")
+                self.next_image()
+            
         
 
     def update_traffic_lights(self, process_name, is_running):
@@ -307,11 +317,18 @@ class MainGUI(QMainWindow):
     def select_target_folder(self):
         folder_path = str(QFileDialog.getExistingDirectory(self, "Select Folder"))
         if folder_path:
-            if not self.imageDisplayApp:  # Create only if not already created
+            self.selected_target_path = folder_path  # Store the selected target path
+            if not self.imageDisplayApp:
                 self.imageDisplayApp = ImageDisplayApp(folder_path)
+                self.imageDisplayApp.image_changed.connect(self.update_image_name_label)
+            else:
+                self.imageDisplayApp.folder_path = folder_path
+                self.imageDisplayApp.image_paths = self.imageDisplayApp.load_image_paths()
+                self.imageDisplayApp.current_image_index = 0
+                self.imageDisplayApp.display_current_image()
+        
             self.imageDisplayApp.show()
-            # Connect the signal to the slot
-            self.imageDisplayApp.image_changed.connect(self.update_image_name_label)
+            self.update_image_name_label(os.path.basename(self.imageDisplayApp.image_paths[self.imageDisplayApp.current_image_index]))
 
     def autoplay(self):
         self.next_image()
@@ -326,7 +343,7 @@ class MainGUI(QMainWindow):
             self.imageDisplayApp.previous_image()
 
     def update_image_name_label(self, image_name):
-        # Update the image name label
+        self.current_image_name = image_name  # Store the current image name
         self.image_name_label.setText(f"Current Image: {image_name}")
 
 if __name__ == '__main__':

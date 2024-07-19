@@ -1,7 +1,6 @@
 ### todo priority
 - gui not responding when collecting data: need to fix this, since there might be too many zombie processes
-- gui stop does not work
-- target display 
+- gui stop does not work 
 - code for tracking
 - 
 

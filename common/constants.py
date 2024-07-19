@@ -85,6 +85,6 @@ class Constants:
         GLOVE_PORT_RIGHT = 53450
         GLOVE_PORT_LEFT = 53451
         GLOVE_FILE_NAME = Paths.GLOVES_PATH + '/gloves.csv'
-        GLOVE_HAND = "right" # is this right or is this wrong or is this left? lol
+        GLOVE_HAND = "left" # is this right or is this wrong or is this left? lol
 
 
