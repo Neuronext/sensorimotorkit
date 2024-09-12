@@ -14,7 +14,7 @@ from gui.variable_display import VariableDisplay
 from gui.traffic_light import TrafficLight
 from common import common_utils
 from common.constants import Constants, MetadataConstants, Components
-from process import start_bodycam_left, start_bodycam_right, start_dartcam, start_gloves, start_eeg
+from process import start_bodycam, start_bodycam_right, start_dartcam, start_gloves, start_eeg
 import threading
 
 def load_stylesheet(file_path):
@@ -288,12 +288,11 @@ class MainGUI(QMainWindow):
         for thread in self.processes.values():
             thread.completion_event.wait()
 
-        time.sleep(2)
         if self.checkbox.isChecked():
-            #check if trail 45 or trial 135. stop on these trials
+            #check if trail 45 or trial 135 or trial 180. stop on these trials
             trial_num = int(self.image_name_label.text().split(":")[1].split('.')[0].strip())
             print(trial_num)
-            if trial_num != 3 and trial_num != 134 and trial_num != 179:
+            if trial_num != 44 and trial_num != 134 and trial_num != 179:
                 print("autoplaying")
                 self.autoplay()
             else:

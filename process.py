@@ -10,8 +10,8 @@ from common.constants import Constants
 from feature_extraction.apply_tracking import main
 
 
-def start_bodycam_left(trial_path): #TODO better state management for left and right
-    print(f"Collecting bodycam left - cam_index 0 data")
+def start_bodycam(trial_path): #TODO better state management for left and right
+    print(f"Collecting bodycam")
     body_cam.acquire_images_common(0, trial_path, None, Constants.FRAME_RATE_BODY_CAM, None, Paths.BODY_LEFT_RAW_PATH, Constants.ACQUIRE_TIME)
 
 def start_bodycam_right(trial_path):

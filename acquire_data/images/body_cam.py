@@ -82,6 +82,8 @@ def create_camera(camera_type, cam_index):
 def acquire_images_common(cam_index, trial_path, fourcc, frame_rate, barrier, cam_folder, acquire_time):
     
     print(f"Starting body camera {cam_index}")
+
+    time.sleep(8)
     # camera = cameras.create_camera_by_index(cam_index)
     camera = create_camera(camera_type=MetadataConstants.CAMERA, cam_index=cam_index)
     camera.init_cam()

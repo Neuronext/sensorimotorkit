@@ -1,10 +1,18 @@
 import csv
 import os
 import cv2
+import os
+import sys
+
+# Add the parent directory to the Python path
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+
 from common.constants import Paths
 import mediapipe as mp
 import numpy as np
 import re
+
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
@@ -161,5 +169,9 @@ def process_all_images(trial_path, draw_skeleton=False):
 
 def main(trial_path, draw_skeleton=False):
     process_all_images(trial_path, draw_skeleton=draw_skeleton)
-    # create_all_videos_from_images(trial_path)
-    # apply_all_histograms(trial_path)
+    #create_all_videos_from_images(trial_path)
+    #apply_all_histograms(trial_path)
+
+if __name__ == "__main__":
+    trial_path = "C:/Users/Data acquisition/sensorimotorkit/data/Raw Data/New Format/7-23 part 1"
+    main(trial_path, draw_skeleton=False)
