@@ -1,47 +1,148 @@
-import csv
+# import csv
+# import os
+# import cv2
+# import os
+# import sys
+
+# #prompt user to choose specific folder from file explorer, assign the chosen folder to the variable "chosen_folder"
+# #in the folder there will be trial folders named with a number from 0 to 150 which represent the trial number the experiment is on
+# #for example a folder can be named "1" which represents that specific folder is for data collected during trial 1
+
+# #Go through each trial folder, enter the folder named "body", and for every image in the body folder apply the apply_pose_tracking_on_image function
+# #create a csv file for the data given by the apply_pose_tracking_on_image function, name the csv file the trial number it is on
+# #save the csv file under the trial folder it is under
+# #continue the steps above for each trial folder present in the chosen_folder
+
+# #create a new folder under the chosen_folder and name it "Complete Data for [insert chosen_folder name]"
+# #combine each csv file in each trial folder into one csv file with columns for the image number, x-coordinate, y-coordinate, z-coordinate, and visibility
+# #place this csv file under the new folder created under the chosen_folder
+
+
+# # Add the parent directory to the Python path
+# parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# sys.path.insert(0, parent_dir)
+
+# from common.constants import Paths
+# import mediapipe as mp
+# import numpy as np
+# import re
+
+# ctrl + /
+# mp_drawing = mp.solutions.drawing_utils
+# mp_pose = mp.solutions.pose
+# pose = mp_pose.Pose()
+
+# def apply_pose_tracking_on_image(image_path, tracked_image_path=None, draw_skeleton=False):
+#     with mp_pose.Pose(static_image_mode=True) as pose:
+#         image = cv2.imread(image_path)
+#         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+#         results = pose.process(image_rgb)
+        
+#         if draw_skeleton:
+#             if results.pose_landmarks:
+#                 mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+        
+#             if tracked_image_path:
+#                 cv2.imwrite(tracked_image_path, image)
+#             else:
+#                 cv2.imshow('Tracked Pose', image)
+#                 cv2.waitKey(0)
+#                 cv2.destroyAllWindows()
+        
+#         return results.pose_landmarks if results.pose_landmarks else None
+
+# test_path = "data/Raw Data/New Format/7-23 part 1/0/body/frame_0_1721743901.335230.png"
+
+# apply_pose_tracking_on_image(test_path, draw_skeleton=True)
+
+
 import os
 import cv2
-import os
-import sys
-
-#loop through all images per trial, created a csv file for each trial in same folder
-#combine all csv files into one folder under the exact trial folder it is under
-#create one csv file with columns for the image number, x, y, z, and visibility
-#from here make a "video" of the pose tracking per trial
-
-
-# Add the parent directory to the Python path
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, parent_dir)
-
-from common.constants import Paths
+import csv
 import mediapipe as mp
-import numpy as np
-import re
+import tkinter as tk
+from tkinter import filedialog
 
+# Initialize pose detection from MediaPipe
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
-pose = mp_pose.Pose()
 
-def apply_pose_tracking_on_image(image_path, tracked_image_path=None, draw_skeleton=False):
+# Function to apply pose tracking on an image and return pose landmarks
+def apply_pose_tracking_on_image(image_path):
     with mp_pose.Pose(static_image_mode=True) as pose:
         image = cv2.imread(image_path)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = pose.process(image_rgb)
         
-        if draw_skeleton:
-            if results.pose_landmarks:
-                mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-        
-            if tracked_image_path:
-                cv2.imwrite(tracked_image_path, image)
-            else:
-                cv2.imshow('Tracked Pose', image)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
-        
-        return results.pose_landmarks if results.pose_landmarks else None
+        # Return landmarks or None if no landmarks were detected
+        if results.pose_landmarks:
+            return results.pose_landmarks.landmark
+        else:
+            return None
 
-test_path = "data/Raw Data/New Format/7-23 part 1/0/body/frame_0_1721743901.335230.png"
+# Function to save landmarks to a CSV file
+def save_landmarks_to_csv(landmarks, csv_path):
+    with open(csv_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Image_Number', 'X', 'Y', 'Z', 'Visibility'])
+        for i, landmark in enumerate(landmarks):
+            writer.writerow([i, landmark.x, landmark.y, landmark.z, landmark.visibility])
 
-apply_pose_tracking_on_image(test_path, draw_skeleton=True)
+# Function to combine all CSV files into one
+def combine_csv_files(trial_folders, output_file):
+    with open(output_file, mode='w', newline='') as outfile:
+        writer = csv.writer(outfile)
+        writer.writerow(['Trial', 'Image_Number', 'X', 'Y', 'Z', 'Visibility'])
+
+        for trial_folder in trial_folders:
+            csv_file = os.path.join(trial_folder, f"{os.path.basename(trial_folder)}.csv")
+            if os.path.exists(csv_file):
+                with open(csv_file, 'r') as infile:
+                    reader = csv.reader(infile)
+                    next(reader)  # Skip the header row
+                    for row in reader:
+                        writer.writerow([os.path.basename(trial_folder)] + row)
+
+# Main function
+def main():
+    # Prompt user to select the main folder
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+    chosen_folder = filedialog.askdirectory(title="Select the main folder")
+    
+    if not chosen_folder:
+        print("No folder selected. Exiting...")
+        return
+    
+    # Create the combined data folder
+    combined_data_folder = os.path.join(chosen_folder, f"Complete Data for {os.path.basename(chosen_folder)}")
+    os.makedirs(combined_data_folder, exist_ok=True)
+    combined_csv_path = os.path.join(combined_data_folder, "combined_data.csv")
+
+    # Iterate over trial folders
+    for trial_folder in os.listdir(chosen_folder):
+        trial_folder_path = os.path.join(chosen_folder, trial_folder)
+        
+        if os.path.isdir(trial_folder_path) and trial_folder.isdigit():
+            body_folder = os.path.join(trial_folder_path, "body")
+            if os.path.exists(body_folder):
+                trial_csv_path = os.path.join(trial_folder_path, f"{trial_folder}.csv")
+                all_landmarks = []
+                
+                # Process each image in the body folder
+                for image_name in os.listdir(body_folder):
+                    image_path = os.path.join(body_folder, image_name)
+                    landmarks = apply_pose_tracking_on_image(image_path)
+                    
+                    if landmarks:
+                        all_landmarks.extend(landmarks)
+                
+                # Save the landmarks to a CSV file for the current trial
+                save_landmarks_to_csv(all_landmarks, trial_csv_path)
+    
+    # Combine all trial CSV files into one
+    combine_csv_files([os.path.join(chosen_folder, folder) for folder in os.listdir(chosen_folder) if folder.isdigit()], combined_csv_path)
+    print(f"All CSV files combined into: {combined_csv_path}")
+
+if __name__ == "__main__":
+    main()
