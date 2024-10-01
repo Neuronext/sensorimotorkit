@@ -55,7 +55,6 @@
 
 # apply_pose_tracking_on_image(test_path, draw_skeleton=True)
 
-
 import os
 import cv2
 import csv
@@ -67,15 +66,19 @@ from tkinter import filedialog
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
-# Function to apply pose tracking on an image and return pose landmarks
-def apply_pose_tracking_on_image(image_path):
+# Function to apply pose tracking on an image, draw landmarks and skeleton, and return pose landmarks
+def apply_pose_tracking_on_image(image_path, save_path):
     with mp_pose.Pose(static_image_mode=True) as pose:
         image = cv2.imread(image_path)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = pose.process(image_rgb)
-        
-        # Return landmarks or None if no landmarks were detected
+
+        # Draw landmarks and skeleton if landmarks were detected
         if results.pose_landmarks:
+            mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+            # Save the modified image
+            cv2.imwrite(save_path, image)
             return results.pose_landmarks.landmark
         else:
             return None
@@ -103,6 +106,18 @@ def combine_csv_files(trial_folders, output_file):
                     for row in reader:
                         writer.writerow([os.path.basename(trial_folder)] + row)
 
+# Function to create a video from images
+def create_video_from_images(image_folder, output_video_path):
+    images = [img for img in os.listdir(image_folder) if img.endswith(".jpg") or img.endswith(".png")]
+    images.sort()  # Sort images to maintain order
+    frame = cv2.imread(os.path.join(image_folder, images[0]))
+    height, width, layers = frame.shape
+    video = cv2.VideoWriter(output_video_path, cv2.VideoWriter_fourcc(*'mp4v'), 10, (width, height))
+
+    for image in images:
+        video.write(cv2.imread(os.path.join(image_folder, image)))
+    video.release()
+
 # Main function
 def main():
     # Prompt user to select the main folder
@@ -128,18 +143,25 @@ def main():
             if os.path.exists(body_folder):
                 trial_csv_path = os.path.join(trial_folder_path, f"{trial_folder}.csv")
                 all_landmarks = []
-                
+                images_to_video = []
+
                 # Process each image in the body folder
                 for image_name in os.listdir(body_folder):
                     image_path = os.path.join(body_folder, image_name)
-                    landmarks = apply_pose_tracking_on_image(image_path)
+                    save_path = os.path.join(trial_folder_path, f"{image_name}_with_landmarks.jpg")
+                    landmarks = apply_pose_tracking_on_image(image_path, save_path)
                     
                     if landmarks:
                         all_landmarks.extend(landmarks)
+                        images_to_video.append(save_path)
                 
                 # Save the landmarks to a CSV file for the current trial
                 save_landmarks_to_csv(all_landmarks, trial_csv_path)
-    
+
+                # Create a video from the saved images
+                video_output_path = os.path.join(trial_folder_path, f"{trial_folder}_video.mp4")
+                create_video_from_images(trial_folder_path, video_output_path)
+
     # Combine all trial CSV files into one
     combine_csv_files([os.path.join(chosen_folder, folder) for folder in os.listdir(chosen_folder) if folder.isdigit()], combined_csv_path)
     print(f"All CSV files combined into: {combined_csv_path}")
